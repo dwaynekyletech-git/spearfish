@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,18 +118,18 @@ const Dashboard = () => {
             </div>
 
             <nav className="hidden md:flex items-center gap-6">
-              <a
-                href="/companies"
+              <Link
+                to="/discover"
                 className="text-sm font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-wide"
               >
                 Browse Companies
-              </a>
-              <a
-                href="/projects"
-                className="text-sm font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-wide"
+              </Link>
+              <Link
+                to="/dashboard"
+                className="text-sm font-semibold text-primary transition-colors uppercase tracking-wide"
               >
                 My Projects
-              </a>
+              </Link>
             </nav>
           </div>
 
