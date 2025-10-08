@@ -21,7 +21,7 @@ const mockCompanies = [
     id: 1,
     name: "PathAI",
     description: "AI-powered pathology diagnostics for cancer detection",
-    logo: "🔬",
+    logo: "",
     batch: "W22",
     teamSize: 45,
     stage: "Series B",
@@ -34,7 +34,7 @@ const mockCompanies = [
     id: 2,
     name: "Watershed",
     description: "Enterprise carbon accounting and climate platform",
-    logo: "🌊",
+    logo: "",
     batch: "S19",
     teamSize: 120,
     stage: "Series C",
@@ -47,7 +47,7 @@ const mockCompanies = [
     id: 3,
     name: "Mutiny",
     description: "No-code AI personalization for B2B websites",
-    logo: "⚡",
+    logo: "",
     batch: "W18",
     teamSize: 65,
     stage: "Series B",
@@ -60,7 +60,7 @@ const mockCompanies = [
     id: 4,
     name: "Ramp",
     description: "Finance automation and corporate cards",
-    logo: "💳",
+    logo: "",
     batch: "W19",
     teamSize: 280,
     stage: "Series D",
@@ -73,7 +73,7 @@ const mockCompanies = [
     id: 5,
     name: "Loom",
     description: "Async video messaging for work",
-    logo: "🎥",
+    logo: "",
     batch: "W16",
     teamSize: 150,
     stage: "Series C",
@@ -86,7 +86,7 @@ const mockCompanies = [
     id: 6,
     name: "Retool",
     description: "Build internal tools with drag-and-drop",
-    logo: "🔧",
+    logo: "",
     batch: "W17",
     teamSize: 200,
     stage: "Series C",
@@ -301,14 +301,14 @@ export default function CompanyDiscovery() {
                 <Card key={company.id} className="group">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-3">
-                      <div className="text-4xl">{company.logo}</div>
-                      <div className="relative">
+                      <div className="w-16 h-16 bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
+                        {company.logo || company.name.charAt(0)}
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
                         <div className="h-14 w-14 rounded-full border-4 border-primary flex items-center justify-center bg-background">
                           <span className="text-xl font-bold text-primary">{company.score}</span>
                         </div>
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
-                          Score
-                        </div>
+                        <span className="text-xs text-muted-foreground">Score</span>
                       </div>
                     </div>
                     <div>
