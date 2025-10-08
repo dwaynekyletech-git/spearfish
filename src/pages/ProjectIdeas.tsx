@@ -13,6 +13,8 @@ import {
   RefreshCw,
   ArrowRight
 } from "lucide-react";
+import { AppHeader } from "@/components/AppHeader";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 interface ProjectIdea {
   id: number;
@@ -105,14 +107,23 @@ export default function ProjectIdeas() {
   };
 
   const handleSelectProject = (projectId: number) => {
-    // In production, this would save the selection and navigate to project builder
     console.log("Selected project:", projectId);
-    navigate(`/dashboard`);
+    navigate(`/add-project?companyId=${id}&projectIdeaId=${projectId}`);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+    <div className="min-h-screen bg-background">
+      <AppHeader currentPage="discover" />
+      
       <div className="container max-w-6xl mx-auto px-4 py-8 space-y-8">
+        <Breadcrumbs 
+          items={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Research", href: `/research/${id}` },
+            { label: "Project Ideas" }
+          ]}
+        />
+        
         {/* Header */}
         <div className="space-y-4">
           <Button
@@ -247,7 +258,7 @@ export default function ProjectIdeas() {
               
               <Button
                 variant="ghost"
-                onClick={() => navigate(`/dashboard`)}
+                onClick={() => navigate(`/add-project?companyId=${id}`)}
                 className="flex-1 md:flex-none"
               >
                 Skip - I'll add my own

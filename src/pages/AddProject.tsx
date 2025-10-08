@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +54,7 @@ interface FormData {
 export default function AddProject() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [techInput, setTechInput] = useState("");
   const [filteredTechs, setFilteredTechs] = useState<string[]>([]);
@@ -70,6 +71,68 @@ export default function AddProject() {
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+
+  // Pre-fill form from URL parameters
+  useEffect(() => {
+    const companyId = searchParams.get("companyId");
+    const projectIdeaId = searchParams.get("projectIdeaId");
+
+    if (companyId) {
+      setFormData(prev => ({ ...prev, companyId }));
+    }
+
+    if (projectIdeaId) {
+      // Mock project ideas data (should match ProjectIdeas.tsx)
+      const mockProjectIdeas = [
+        {
+          id: "1",
+          title: "Real-time Collaboration Performance Optimizer",
+          description: "Build a WebSocket connection pooling and optimization layer that intelligently manages concurrent user sessions. Implements smart batching of updates and predictive caching to reduce server load and improve response times for 10+ concurrent users.",
+          problemSolved: "Real-time collaboration performance at scale",
+          technologies: ["WebSocket", "Redis", "Node.js", "React", "TypeScript"],
+        },
+        {
+          id: "2",
+          title: "Intelligent API Rate Limit Manager",
+          description: "Create an intelligent middleware that predicts and manages API rate limits across multiple third-party services. Features include automatic request queuing, smart retry logic with exponential backoff, and real-time dashboard showing rate limit status and usage patterns.",
+          problemSolved: "API rate limiting causing user friction",
+          technologies: ["Node.js", "TypeScript", "Bull Queue", "PostgreSQL", "React"],
+        },
+        {
+          id: "3",
+          title: "Mobile-First Component Library",
+          description: "Design and build a comprehensive mobile-first component library with touch-optimized interactions, responsive layouts, and progressive enhancement. Includes documentation, Storybook integration, and migration guides for existing components.",
+          problemSolved: "Mobile experience significantly lags desktop",
+          technologies: ["React", "TypeScript", "Tailwind CSS", "Storybook", "Vite"],
+        },
+        {
+          id: "4",
+          title: "Interactive Onboarding Tutorial System",
+          description: "Build a context-aware, interactive tutorial system that guides new users through key features with tooltips, highlights, and step-by-step walkthroughs. Tracks user progress and adapts content based on user behavior and role.",
+          problemSolved: "Onboarding complexity for new users",
+          technologies: ["React", "TypeScript", "Framer Motion", "Zustand"],
+        },
+        {
+          id: "5",
+          title: "Predictive Performance Monitoring Dashboard",
+          description: "Create a real-time dashboard that monitors system performance metrics and uses ML to predict potential bottlenecks before they impact users. Features anomaly detection, automated alerts, and actionable insights.",
+          problemSolved: "Lack of visibility into system performance patterns",
+          technologies: ["Python", "TensorFlow", "React", "D3.js", "WebSocket"],
+        },
+      ];
+
+      const selectedProject = mockProjectIdeas.find(p => p.id === projectIdeaId);
+      if (selectedProject) {
+        setFormData(prev => ({
+          ...prev,
+          title: selectedProject.title,
+          description: selectedProject.description,
+          problemSolved: selectedProject.problemSolved,
+          technologies: selectedProject.technologies,
+        }));
+      }
+    }
+  }, [searchParams]);
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -156,13 +219,12 @@ export default function AddProject() {
 
   const handleGenerateEmail = () => {
     setShowSuccessDialog(false);
-    // In production, navigate to email generation with project data
-    navigate(`/outreach/${formData.companyId}`);
+    navigate(`/email/${formData.companyId}`);
   };
 
   const handleGoToProjects = () => {
     setShowSuccessDialog(false);
-    navigate("/dashboard");
+    navigate("/portfolio");
   };
 
   return (
