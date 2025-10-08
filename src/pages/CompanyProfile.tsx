@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, ExternalLink, Calendar, Users, Briefcase, TrendingUp, CheckCircle, Github, Download, Video, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +51,7 @@ const mockCompanyData: Record<string, any> = {
 
 export default function CompanyProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("about");
   
   const company = mockCompanyData[id || "1"] || mockCompanyData["1"];
@@ -298,7 +299,11 @@ export default function CompanyProfile() {
               <p className="text-muted-foreground mb-6">
                 Start the research process and build a project that will get you noticed by {company.name}
               </p>
-              <Button size="lg" variant="glow" className="text-lg h-16 px-12">
+              <Button 
+                size="lg" 
+                className="text-lg h-16 px-12"
+                onClick={() => navigate(`/research/${id}`)}
+              >
                 Spearfish This Company
               </Button>
             </div>
