@@ -296,53 +296,53 @@ export default function CompanyDiscovery() {
             <div className="mb-4 text-sm text-muted-foreground">
               Showing {filteredCompanies.length} {filteredCompanies.length === 1 ? 'company' : 'companies'}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {filteredCompanies.map(company => (
-                <Card key={company.id} className="group">
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-16 h-16 bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
+                <Card key={company.id} className="group hover:shadow-xl transition-shadow">
+                  <CardHeader className="pb-4 space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center text-3xl font-bold text-muted-foreground shrink-0">
                         {company.logo || company.name.charAt(0)}
                       </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="h-14 w-14 rounded-full border-4 border-primary flex items-center justify-center bg-background">
-                          <span className="text-xl font-bold text-primary">{company.score}</span>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="h-16 w-16 rounded-full border-4 border-primary flex items-center justify-center bg-background shadow-sm">
+                          <span className="text-2xl font-bold text-primary">{company.score}</span>
                         </div>
-                        <span className="text-xs text-muted-foreground">Score</span>
+                        <span className="text-xs font-medium text-muted-foreground">Score</span>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-foreground mb-1">{company.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
+                    <div className="space-y-2">
+                      <h3 className="text-2xl font-bold text-foreground leading-tight">{company.name}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed min-h-[40px]">{company.description}</p>
                     </div>
-                    <div className="flex gap-2 mt-3">
-                      <Badge variant="secondary">{company.batch}</Badge>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="text-xs font-semibold">{company.batch}</Badge>
                       {company.hiring && (
-                        <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs font-semibold">
                           Hiring
                         </Badge>
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Users className="h-4 w-4" />
+                  <CardContent className="pb-4">
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <Users className="h-4 w-4 shrink-0" />
                         <span>{company.teamSize} people</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Briefcase className="h-4 w-4" />
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <Briefcase className="h-4 w-4 shrink-0" />
                         <span>{company.stage}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <GitBranch className="h-4 w-4" />
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <GitBranch className="h-4 w-4 shrink-0" />
                         <span>{company.githubActivity} Activity</span>
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="pt-4">
                     <Link to={`/company/${company.id}`} className="w-full">
-                      <Button className="w-full" variant="glow">
+                      <Button className="w-full h-12 text-sm" variant="glow">
                         Spearfish This Company
                       </Button>
                     </Link>
