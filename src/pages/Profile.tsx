@@ -269,22 +269,22 @@ const Profile = () => {
               <CardContent className="space-y-6">
                 {/* Avatar */}
                 <div className="flex items-center gap-6">
-                  <Avatar className="h-24 w-24 border-4 border-primary">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-primary text-primary-foreground font-bold text-2xl">
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-2">
-                    <Label>Profile Picture</Label>
-                    <Button variant="outline" onClick={handleAvatarUpload}>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload New Avatar
-                    </Button>
+                  <div className="flex items-center gap-4 flex-1">
+                    <Label className="text-foreground min-w-32">Profile Picture</Label>
+                    <Avatar className="h-24 w-24 border-4 border-primary">
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarFallback className="bg-primary text-primary-foreground font-bold text-2xl">
+                        {user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
+                  <Button variant="outline" onClick={handleAvatarUpload}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload New Avatar
+                  </Button>
                 </div>
 
                 {/* Basic Info */}
