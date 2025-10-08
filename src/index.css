@@ -8,23 +8,23 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 215 25% 97%;
-    --foreground: 215 20% 15%;
+    --background: 0 0% 98%;
+    --foreground: 0 0% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 20% 15%;
+    --card-foreground: 0 0% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 20% 15%;
+    --popover-foreground: 0 0% 15%;
 
-    --primary: 173 70% 52%;
+    --primary: 0 85% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 96%;
-    --secondary-foreground: 173 70% 52%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 85% 65%;
 
-    --muted: 215 20% 92%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 45%;
 
     --accent: 280 60% 60%;
     --accent-foreground: 0 0% 100%;
@@ -32,50 +32,50 @@ All colors MUST be HSL.
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 88%;
-    --input: 215 20% 88%;
-    --ring: 173 70% 52%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 85% 65%;
 
     --radius: 0.5rem;
     
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --sidebar-background: 215 25% 98%;
+    --sidebar-background: 0 0% 98%;
 
-    --sidebar-foreground: 215 20% 25%;
+    --sidebar-foreground: 0 0% 20%;
 
-    --sidebar-primary: 215 25% 15%;
+    --sidebar-primary: 0 0% 15%;
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 215 20% 95%;
+    --sidebar-accent: 0 0% 95%;
 
-    --sidebar-accent-foreground: 215 25% 15%;
+    --sidebar-accent-foreground: 0 0% 15%;
 
-    --sidebar-border: 215 20% 90%;
+    --sidebar-border: 0 0% 90%;
 
-    --sidebar-ring: 173 70% 52%;
+    --sidebar-ring: 0 85% 65%;
   }
 
   .dark {
-    --background: 215 25% 12%;
-    --foreground: 215 15% 95%;
+    --background: 0 0% 12%;
+    --foreground: 0 0% 98%;
 
-    --card: 215 20% 16%;
-    --card-foreground: 215 15% 95%;
+    --card: 0 0% 16%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 215 20% 16%;
-    --popover-foreground: 215 15% 95%;
+    --popover: 0 0% 16%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 173 70% 52%;
-    --primary-foreground: 215 25% 10%;
+    --primary: 0 85% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 20%;
-    --secondary-foreground: 173 70% 52%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 85% 65%;
 
-    --muted: 215 20% 22%;
-    --muted-foreground: 215 15% 65%;
+    --muted: 0 0% 22%;
+    --muted-foreground: 0 0% 65%;
 
     --accent: 280 60% 60%;
     --accent-foreground: 0 0% 100%;
@@ -83,9 +83,9 @@ All colors MUST be HSL.
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 25%;
-    --input: 215 20% 25%;
-    --ring: 173 70% 52%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 0 85% 65%;
     
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
