@@ -341,9 +341,11 @@ export default function CompanyDiscovery() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full" variant="glow">
-                      Spearfish This Company
-                    </Button>
+                    <Link to={`/company/${company.id}`} className="w-full">
+                      <Button className="w-full" variant="glow">
+                        Spearfish This Company
+                      </Button>
+                    </Link>
                   </CardFooter>
                 </Card>
               ))}
