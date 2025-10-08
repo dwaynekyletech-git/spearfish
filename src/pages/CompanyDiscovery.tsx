@@ -22,80 +22,122 @@ const mockCompanies = [
   {
     id: 1,
     name: "PathAI",
-    description: "AI-powered pathology diagnostics for cancer detection",
-    logo: "",
+    slug: "pathai",
+    one_liner: "AI-powered pathology diagnostics for cancer detection",
+    long_description: "PathAI is developing AI-powered technology to improve the accuracy of diagnosis in pathology, starting with cancer.",
+    small_logo_thumb_url: "",
+    website: "https://pathai.com",
+    all_locations: ["Boston, MA, USA"],
     batch: "W22",
-    teamSize: 45,
+    team_size: 45,
     stage: "Series B",
+    isHiring: true,
+    industries: ["Healthcare", "AI"],
+    launched_at: "2016-01-15T00:00:00Z",
+    url: "https://www.ycombinator.com/companies/pathai",
+    // Custom Spearfish fields
     githubActivity: "High",
     score: 94,
-    hiring: true,
-    industries: ["Healthcare", "AI"]
   },
   {
     id: 2,
     name: "Watershed",
-    description: "Enterprise carbon accounting and climate platform",
-    logo: "",
+    slug: "watershed",
+    one_liner: "Enterprise carbon accounting and climate platform",
+    long_description: "Watershed helps companies measure, reduce, and report their carbon emissions with enterprise-grade software.",
+    small_logo_thumb_url: "",
+    website: "https://watershed.com",
+    all_locations: ["San Francisco, CA, USA"],
     batch: "S19",
-    teamSize: 120,
+    team_size: 120,
     stage: "Series C",
+    isHiring: true,
+    industries: ["Climate", "Enterprise"],
+    launched_at: "2019-06-01T00:00:00Z",
+    url: "https://www.ycombinator.com/companies/watershed",
+    // Custom Spearfish fields
     githubActivity: "Medium",
     score: 88,
-    hiring: true,
-    industries: ["Climate", "Enterprise"]
   },
   {
     id: 3,
     name: "Mutiny",
-    description: "No-code AI personalization for B2B websites",
-    logo: "",
+    slug: "mutiny",
+    one_liner: "No-code AI personalization for B2B websites",
+    long_description: "Mutiny enables B2B companies to personalize their websites for every visitor without writing code.",
+    small_logo_thumb_url: "",
+    website: "https://mutinyhq.com",
+    all_locations: ["San Francisco, CA, USA"],
     batch: "W18",
-    teamSize: 65,
+    team_size: 65,
     stage: "Series B",
+    isHiring: false,
+    industries: ["Marketing", "AI"],
+    launched_at: "2018-01-01T00:00:00Z",
+    url: "https://www.ycombinator.com/companies/mutiny",
+    // Custom Spearfish fields
     githubActivity: "High",
     score: 92,
-    hiring: false,
-    industries: ["Marketing", "AI"]
   },
   {
     id: 4,
     name: "Ramp",
-    description: "Finance automation and corporate cards",
-    logo: "",
+    slug: "ramp",
+    one_liner: "Finance automation and corporate cards",
+    long_description: "Ramp is the finance automation platform designed to save businesses time and money.",
+    small_logo_thumb_url: "",
+    website: "https://ramp.com",
+    all_locations: ["New York, NY, USA"],
     batch: "W19",
-    teamSize: 280,
+    team_size: 280,
     stage: "Series D",
+    isHiring: true,
+    industries: ["Fintech", "SaaS"],
+    launched_at: "2019-02-01T00:00:00Z",
+    url: "https://www.ycombinator.com/companies/ramp",
+    // Custom Spearfish fields
     githubActivity: "Very High",
     score: 85,
-    hiring: true,
-    industries: ["Fintech", "SaaS"]
   },
   {
     id: 5,
     name: "Loom",
-    description: "Async video messaging for work",
-    logo: "",
+    slug: "loom",
+    one_liner: "Async video messaging for work",
+    long_description: "Loom is a video messaging tool that helps you get your message across through instantly shareable videos.",
+    small_logo_thumb_url: "",
+    website: "https://loom.com",
+    all_locations: ["San Francisco, CA, USA"],
     batch: "W16",
-    teamSize: 150,
+    team_size: 150,
     stage: "Series C",
+    isHiring: true,
+    industries: ["Productivity", "Video"],
+    launched_at: "2016-01-01T00:00:00Z",
+    url: "https://www.ycombinator.com/companies/loom",
+    // Custom Spearfish fields
     githubActivity: "Medium",
     score: 79,
-    hiring: true,
-    industries: ["Productivity", "Video"]
   },
   {
     id: 6,
     name: "Retool",
-    description: "Build internal tools with drag-and-drop",
-    logo: "",
+    slug: "retool",
+    one_liner: "Build internal tools with drag-and-drop",
+    long_description: "Retool is a fast way to build internal tools. Drag-and-drop our building blocks and connect them to your databases and APIs.",
+    small_logo_thumb_url: "",
+    website: "https://retool.com",
+    all_locations: ["San Francisco, CA, USA"],
     batch: "W17",
-    teamSize: 200,
+    team_size: 200,
     stage: "Series C",
+    isHiring: true,
+    industries: ["Developer Tools", "SaaS"],
+    launched_at: "2017-01-01T00:00:00Z",
+    url: "https://www.ycombinator.com/companies/retool",
+    // Custom Spearfish fields
     githubActivity: "High",
     score: 91,
-    hiring: true,
-    industries: ["Developer Tools", "SaaS"]
   }
 ];
 
@@ -135,12 +177,12 @@ export default function CompanyDiscovery() {
   const filteredCompanies = mockCompanies
     .filter(company => {
       if (searchQuery && !company.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !company.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+          !company.one_liner.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
       if (selectedBatch !== "All" && company.batch !== selectedBatch) return false;
-      if (hiringOnly && !company.hiring) return false;
-      if (company.teamSize < teamSize[0] || company.teamSize > teamSize[1]) return false;
+      if (hiringOnly && !company.isHiring) return false;
+      if (company.team_size < teamSize[0] || company.team_size > teamSize[1]) return false;
       if (selectedIndustries.length > 0 && !company.industries.some(i => selectedIndustries.includes(i))) {
         return false;
       }
@@ -148,7 +190,7 @@ export default function CompanyDiscovery() {
     })
     .sort((a, b) => {
       if (sortBy === "score") return b.score - a.score;
-      if (sortBy === "teamSize") return b.teamSize - a.teamSize;
+      if (sortBy === "teamSize") return b.team_size - a.team_size;
       if (sortBy === "batch") return b.batch.localeCompare(a.batch);
       return 0;
     });
@@ -302,7 +344,7 @@ export default function CompanyDiscovery() {
                   <CardHeader className="pb-4 space-y-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center text-3xl font-bold text-muted-foreground shrink-0">
-                        {company.logo || company.name.charAt(0)}
+                        {company.small_logo_thumb_url || company.name.charAt(0)}
                       </div>
                       <div className="flex flex-col items-center gap-2">
                         <div className="h-16 w-16 rounded-full border-4 border-primary flex items-center justify-center bg-background shadow-sm">
@@ -313,11 +355,11 @@ export default function CompanyDiscovery() {
                     </div>
                     <div className="space-y-2">
                       <h3 className="text-2xl font-bold text-foreground leading-tight">{company.name}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed min-h-[40px]">{company.description}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed min-h-[40px]">{company.one_liner}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary" className="text-xs font-semibold">{company.batch}</Badge>
-                      {company.hiring && (
+                      {company.isHiring && (
                         <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs font-semibold">
                           Hiring
                         </Badge>
@@ -328,7 +370,7 @@ export default function CompanyDiscovery() {
                     <div className="space-y-3 text-sm">
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Users className="h-4 w-4 shrink-0" />
-                        <span>{company.teamSize} people</span>
+                        <span>{company.team_size} people</span>
                       </div>
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Briefcase className="h-4 w-4 shrink-0" />

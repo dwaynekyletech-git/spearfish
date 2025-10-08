@@ -14,16 +14,23 @@ const mockCompanyData: Record<string, any> = {
   "1": {
     id: 1,
     name: "PathAI",
-    tagline: "AI-powered pathology diagnostics for cancer detection",
-    description: "PathAI is developing AI-powered technology to improve the accuracy of diagnosis in pathology, starting with cancer. Our platform uses deep learning to help pathologists make faster, more accurate diagnoses, ultimately improving patient outcomes. We're working with leading academic medical centers and pharmaceutical companies to validate and deploy our technology.",
-    mission: "Our mission is to improve patient outcomes with AI-powered pathology. We believe that combining the expertise of pathologists with the power of machine learning will transform how cancer and other diseases are diagnosed and treated.",
-    logo: "",
+    slug: "pathai",
+    one_liner: "AI-powered pathology diagnostics for cancer detection",
+    long_description: "PathAI is developing AI-powered technology to improve the accuracy of diagnosis in pathology, starting with cancer. Our platform uses deep learning to help pathologists make faster, more accurate diagnoses, ultimately improving patient outcomes. We're working with leading academic medical centers and pharmaceutical companies to validate and deploy our technology.",
+    small_logo_thumb_url: "",
     website: "https://pathai.com",
+    all_locations: ["Boston, MA, USA"],
     batch: "W22",
     stage: "Series B",
-    teamSize: 45,
+    team_size: 45,
+    industries: ["Healthcare", "AI"],
+    launched_at: "2016-01-15T00:00:00Z",
+    url: "https://www.ycombinator.com/companies/pathai",
+    isHiring: true,
+    // Custom Spearfish fields
     founded: "2016",
     score: 94,
+    mission: "Our mission is to improve patient outcomes with AI-powered pathology. We believe that combining the expertise of pathologists with the power of machine learning will transform how cancer and other diseases are diagnosed and treated.",
     scoreBreakdown: [
       { factor: "W22 Batch - Recent and well-funded cohort", points: 25, maxPoints: 30 },
       { factor: "Series B Stage - Proven product-market fit", points: 20, maxPoints: 25 },
@@ -66,7 +73,7 @@ export default function CompanyProfile() {
   const stats = [
     { label: "Batch", value: company.batch, icon: TrendingUp },
     { label: "Stage", value: company.stage, icon: Briefcase },
-    { label: "Team Size", value: `${company.teamSize} people`, icon: Users },
+    { label: "Team Size", value: `${company.team_size} people`, icon: Users },
     { label: "Founded", value: company.founded, icon: Calendar },
   ];
 
@@ -92,11 +99,11 @@ export default function CompanyProfile() {
             <div className="flex-1">
               <div className="flex items-start gap-6 mb-4">
                 <div className="w-24 h-24 bg-muted flex items-center justify-center text-4xl font-bold text-muted-foreground shrink-0">
-                  {company.logo || company.name.charAt(0)}
+                  {company.small_logo_thumb_url || company.name.charAt(0)}
                 </div>
                 <div className="flex-1">
                   <h1 className="text-4xl font-bold text-foreground mb-2">{company.name}</h1>
-                  <p className="text-lg text-muted-foreground mb-3">{company.tagline}</p>
+                  <p className="text-lg text-muted-foreground mb-3">{company.one_liner}</p>
                   <a 
                     href={company.website} 
                     target="_blank" 
@@ -159,7 +166,7 @@ export default function CompanyProfile() {
                 <CardTitle>What They Do</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed">{company.description}</p>
+                <p className="text-muted-foreground leading-relaxed">{company.long_description}</p>
               </CardContent>
             </Card>
 
