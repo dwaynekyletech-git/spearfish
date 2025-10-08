@@ -467,20 +467,20 @@ export default function AddProject() {
               Your project has been added to your portfolio. Would you like to generate an outreach email for this project?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6">
             <Button
               variant="outline"
               onClick={handleGoToProjects}
-              className="w-full uppercase font-semibold text-sm"
+              className="w-full sm:w-auto sm:flex-1 uppercase font-semibold text-sm"
             >
               No, Go to Projects
             </Button>
             <Button
               onClick={handleGenerateEmail}
-              className="w-full uppercase font-semibold text-sm"
+              className="w-full sm:w-auto sm:flex-1 uppercase font-semibold text-sm justify-center"
             >
               <Sparkles className="h-4 w-4 mr-2 shrink-0" />
-              <span className="whitespace-nowrap">Generate Outreach Email</span>
+              Generate Outreach Email
             </Button>
           </DialogFooter>
         </DialogContent>
