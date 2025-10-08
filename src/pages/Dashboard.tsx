@@ -1,7 +1,10 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,19 +15,41 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Target,
-  Building2,
-  FolderKanban,
-  Mail,
+  Plus,
+  Share2,
+  ExternalLink,
+  Github,
+  Edit,
+  Trash2,
+  CheckCircle2,
+  Clock,
+  MessageSquare,
   Briefcase,
   Search,
-  Plus,
-  Eye,
-  TrendingUp,
-  Clock,
-  Zap,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface Project {
+  id: number;
+  title: string;
+  company: {
+    id: string;
+    name: string;
+    logo: string;
+  };
+  description: string;
+  technologies: string[];
+  demoLink?: string;
+  githubLink?: string;
+  outcome: "no_response" | "interview" | "hired";
+  isPublic: boolean;
+}
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [activeFilter, setActiveFilter] = useState<"all" | "no_response" | "interview" | "hired">("all");
+
   // Mock data - would come from backend in real app
   const user = {
     name: "Alex Chen",
@@ -32,75 +57,91 @@ const Dashboard = () => {
     avatar: "",
   };
 
-  const stats = [
-    { label: "Companies Researched", value: 24, icon: Building2, color: "primary" },
-    { label: "Projects Built", value: 7, icon: FolderKanban, color: "accent" },
-    { label: "Emails Sent", value: 15, icon: Mail, color: "warning" },
-    { label: "Interviews Secured", value: 3, icon: Briefcase, color: "primary" },
-  ];
-
-  const recommendedStartups = [
+  const allProjects: Project[] = [
     {
       id: 1,
-      logo: "",
-      name: "PathAI",
-      tagline: "AI-powered medical diagnostics",
-      score: 94,
-      matchReason: "Strong ML focus",
+      title: "Real-time Collaboration Optimizer",
+      company: {
+        id: "1",
+        name: "PathAI",
+        logo: ""
+      },
+      description: "Built a WebSocket connection pooling and optimization layer that intelligently manages concurrent user sessions, reducing latency by 60%.",
+      technologies: ["WebSocket", "Redis", "Node.js", "React", "TypeScript"],
+      demoLink: "https://demo.example.com",
+      githubLink: "https://github.com/user/project",
+      outcome: "interview",
+      isPublic: true
     },
     {
       id: 2,
-      logo: "",
-      name: "Vanta",
-      tagline: "Security compliance automation",
-      score: 89,
-      matchReason: "DevOps expertise needed",
+      title: "Intelligent API Rate Limit Manager",
+      company: {
+        id: "2",
+        name: "Anthropic",
+        logo: ""
+      },
+      description: "Created an intelligent middleware that predicts and manages API rate limits across multiple third-party services with smart retry logic.",
+      technologies: ["Node.js", "TypeScript", "Bull Queue", "PostgreSQL"],
+      githubLink: "https://github.com/user/rate-limiter",
+      outcome: "hired",
+      isPublic: true
     },
     {
       id: 3,
-      logo: "",
-      name: "Ramp",
-      tagline: "Corporate card and expense management",
-      score: 87,
-      matchReason: "Backend scale challenges",
-    },
-    {
-      id: 4,
-      logo: "",
-      name: "Notion",
-      tagline: "Connected workspace for teams",
-      score: 85,
-      matchReason: "React expertise valued",
-    },
+      title: "Mobile-First Component Library",
+      company: {
+        id: "3",
+        name: "Scale AI",
+        logo: ""
+      },
+      description: "Designed and built a comprehensive mobile-first component library with touch-optimized interactions and responsive layouts.",
+      technologies: ["React", "TypeScript", "Tailwind CSS", "Storybook", "Vite"],
+      demoLink: "https://storybook.example.com",
+      githubLink: "https://github.com/user/components",
+      outcome: "no_response",
+      isPublic: true
+    }
   ];
 
-  const recentActivity = [
-    { action: "Researched PathAI", time: "2 hours ago", icon: Search },
-    { action: "Added project: Medical Image Classifier", time: "5 hours ago", icon: Plus },
-    { action: "Sent outreach to Vanta CTO", time: "1 day ago", icon: Mail },
-    { action: "Completed Ramp technical research", time: "2 days ago", icon: Building2 },
-  ];
+  const filteredProjects = activeFilter === "all" 
+    ? allProjects 
+    : allProjects.filter(p => p.outcome === activeFilter);
 
-  const quickActions = [
-    {
-      title: "Discover New Startups",
-      description: "Find companies that match your skills",
-      icon: Search,
-      color: "primary",
-    },
-    {
-      title: "Add a Project",
-      description: "Showcase your latest work",
-      icon: Plus,
-      color: "accent",
-    },
-    {
-      title: "View Portfolio",
-      description: "See all your spearfishing targets",
-      icon: Eye,
-      color: "warning",
-    },
-  ];
+  const projectCounts = {
+    all: allProjects.length,
+    no_response: allProjects.filter(p => p.outcome === "no_response").length,
+    interview: allProjects.filter(p => p.outcome === "interview").length,
+    hired: allProjects.filter(p => p.outcome === "hired").length,
+  };
+
+  const getOutcomeBadge = (outcome: Project["outcome"]) => {
+    switch (outcome) {
+      case "hired":
+        return { label: "Hired", variant: "default" as const, icon: CheckCircle2 };
+      case "interview":
+        return { label: "Interview", variant: "default" as const, icon: MessageSquare };
+      case "no_response":
+        return { label: "No Response", variant: "secondary" as const, icon: Clock };
+    }
+  };
+
+  const handleSharePortfolio = () => {
+    const portfolioUrl = `${window.location.origin}/portfolio/${user.name.toLowerCase().replace(" ", "-")}`;
+    navigator.clipboard.writeText(portfolioUrl);
+    toast({
+      title: "Portfolio Link Copied!",
+      description: "Your public portfolio link has been copied to clipboard",
+    });
+  };
+
+  const handleDeleteProject = (projectId: number) => {
+    // In production, call API to delete
+    toast({
+      title: "Project Deleted",
+      description: "The project has been removed from your portfolio",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,172 +205,198 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-7xl space-y-12">
-        {/* Welcome Message */}
-        <div className="space-y-2">
-          <h1 className="text-5xl font-black text-foreground">
-            Welcome back, <span className="text-primary">{user.name}</span>
-          </h1>
-          <p className="text-xl text-muted-foreground">Ready to land your next opportunity?</p>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <Card key={index} className="hover:border-primary transition-all">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                      {stat.label}
-                    </p>
-                    <p className="text-5xl font-black text-foreground mt-2">{stat.value}</p>
-                  </div>
-                  <div
-                    className={`w-16 h-16 flex items-center justify-center ${
-                      stat.color === "primary"
-                        ? "bg-primary"
-                        : stat.color === "accent"
-                        ? "bg-accent"
-                        : "bg-warning"
-                    }`}
-                  >
-                    <stat.icon
-                      className={`w-8 h-8 ${
-                        stat.color === "primary"
-                          ? "text-primary-foreground"
-                          : stat.color === "accent"
-                          ? "text-accent-foreground"
-                          : "text-warning-foreground"
-                      }`}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Recommended Startups */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-black text-foreground uppercase tracking-tight">
-                Recommended Startups
-              </h2>
-              <p className="text-muted-foreground mt-1">Perfect matches based on your profile</p>
-            </div>
-            <Button variant="outline" size="sm">
-              View All
+      <main className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold">My Projects</h1>
+            <p className="text-muted-foreground mt-1">
+              Your portfolio of work showcasing what you've built
+            </p>
+          </div>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={handleSharePortfolio}
+              className="flex-1 sm:flex-none"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share Portfolio
+            </Button>
+            <Button
+              onClick={() => navigate("/add-project")}
+              className="flex-1 sm:flex-none"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Project
             </Button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recommendedStartups.map((startup) => (
-              <Card key={startup.id} className="hover:border-primary transition-all">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <Building2 className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4 text-primary" />
-                      <span className="text-xl font-black text-primary">{startup.score}</span>
-                    </div>
-                  </div>
-                  <CardTitle className="text-xl">{startup.name}</CardTitle>
-                  <CardDescription className="text-sm">{startup.tagline}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-xs text-muted-foreground bg-muted px-3 py-2">
-                    {startup.matchReason}
-                  </div>
-                  <Button className="w-full" variant="glow" size="sm">
-                    <Zap className="w-4 h-4 mr-2" />
-                    Spearfish
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-black uppercase tracking-tight">
-                Recent Activity
-              </CardTitle>
-              <CardDescription>Your latest actions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-primary/10 border-2 border-primary flex items-center justify-center shrink-0">
-                      <activity.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-semibold text-foreground">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Filter Tabs */}
+        {allProjects.length > 0 && (
+          <Tabs value={activeFilter} onValueChange={(value) => setActiveFilter(value as any)}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="all" className="relative">
+                All Projects
+                <Badge variant="secondary" className="ml-2">
+                  {projectCounts.all}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="no_response" className="relative">
+                No Response
+                <Badge variant="secondary" className="ml-2">
+                  {projectCounts.no_response}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="interview" className="relative">
+                Interview
+                <Badge variant="secondary" className="ml-2">
+                  {projectCounts.interview}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="hired" className="relative">
+                Hired
+                <Badge variant="secondary" className="ml-2">
+                  {projectCounts.hired}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
 
-          {/* Quick Actions */}
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-black text-foreground uppercase tracking-tight">
-                Quick Actions
-              </h2>
-              <p className="text-muted-foreground text-sm mt-1">Jump right in</p>
-            </div>
+        {/* Projects Grid */}
+        {filteredProjects.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {filteredProjects.map((project) => {
+              const outcome = getOutcomeBadge(project.outcome);
+              return (
+                <Card key={project.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-muted flex items-center justify-center text-xl font-bold text-muted-foreground shrink-0">
+                          {project.company.logo || project.company.name.charAt(0)}
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl">{project.title}</CardTitle>
+                          <p className="text-sm text-muted-foreground">{project.company.name}</p>
+                        </div>
+                      </div>
+                      <Badge variant={outcome.variant} className="shrink-0">
+                        <outcome.icon className="h-3 w-3 mr-1" />
+                        {outcome.label}
+                      </Badge>
+                    </div>
+                  </CardHeader>
 
-            <div className="space-y-4">
-              {quickActions.map((action, index) => (
-                <Card
-                  key={index}
-                  className="cursor-pointer hover:border-primary hover:translate-x-1 hover:translate-y-[-4px] transition-all"
-                >
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-14 h-14 flex items-center justify-center ${
-                          action.color === "primary"
-                            ? "bg-primary"
-                            : action.color === "accent"
-                            ? "bg-accent"
-                            : "bg-warning"
-                        }`}
+                  <CardContent className="space-y-4">
+                    <CardDescription className="text-sm leading-relaxed">
+                      {project.description}
+                    </CardDescription>
+
+                    {/* Technologies */}
+                    <div className="flex flex-wrap gap-2">
+                      {project.technologies.map((tech) => (
+                        <Badge key={tech} variant="outline" className="text-xs">
+                          {tech}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    {/* Links */}
+                    {(project.demoLink || project.githubLink) && (
+                      <div className="flex gap-2">
+                        {project.demoLink && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="flex-1"
+                          >
+                            <a
+                              href={project.demoLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              Demo
+                            </a>
+                          </Button>
+                        )}
+                        {project.githubLink && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="flex-1"
+                          >
+                            <a
+                              href={project.githubLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Github className="h-3 w-3 mr-1" />
+                              Code
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-border">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => navigate(`/edit-project/${project.id}`)}
                       >
-                        <action.icon
-                          className={`w-7 h-7 ${
-                            action.color === "primary"
-                              ? "text-primary-foreground"
-                              : action.color === "accent"
-                              ? "text-accent-foreground"
-                              : "text-warning-foreground"
-                          }`}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-foreground text-lg">{action.title}</h3>
-                        <p className="text-sm text-muted-foreground">{action.description}</p>
-                      </div>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1 text-destructive hover:text-destructive"
+                        onClick={() => handleDeleteProject(project.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </div>
+        ) : (
+          /* Empty State */
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
+                <Target className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">No projects yet</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                Start by researching a company and building a project that solves their specific problems
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/discover")}
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Browse Companies
+                </Button>
+                <Button onClick={() => navigate("/add-project")}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Project
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
