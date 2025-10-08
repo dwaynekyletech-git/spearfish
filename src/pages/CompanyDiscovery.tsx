@@ -153,7 +153,7 @@ export default function CompanyDiscovery() {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <div className="text-2xl">🎯</div>
-              <span className="text-xl font-bold text-foreground">Spearfish</span>
+              <span className="text-xl font-bold text-foreground">SpearfishIn AI</span>
             </Link>
             <nav className="flex items-center gap-6">
               <Link to="/discover" className="text-sm font-medium text-primary">
@@ -343,7 +343,7 @@ export default function CompanyDiscovery() {
                   <CardFooter>
                     <Link to={`/company/${company.id}`} className="w-full">
                       <Button className="w-full" variant="glow">
-                        Spearfish This Company
+                        SpearfishIn This Company
                       </Button>
                     </Link>
                   </CardFooter>

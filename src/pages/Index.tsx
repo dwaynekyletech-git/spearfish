@@ -13,7 +13,7 @@ const Index = () => {
             <div className="w-10 h-10 bg-primary flex items-center justify-center">
               <Target className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-black text-foreground uppercase tracking-tight">Spearfish AI</span>
+            <span className="text-2xl font-black text-foreground uppercase tracking-tight">SpearfishIn AI</span>
           </div>
           <Button variant="glow" size="default">Get Started</Button>
         </div>
@@ -133,10 +133,10 @@ const Index = () => {
               <span className="text-sm font-bold uppercase tracking-wider text-accent">The Solution</span>
             </div>
             <h2 className="text-5xl lg:text-7xl font-black text-foreground leading-tight mb-6">
-              The Spearfishing Method
+              The SpearfishIn Method
             </h2>
             <p className="text-2xl text-muted-foreground max-w-3xl">
-              Stop fishing with a net. Start spearfishing with precision.
+              Stop fishing with a net. Start SpearfishIn with precision.
             </p>
           </div>
 
@@ -228,7 +228,7 @@ const Index = () => {
                 <div className="w-10 h-10 bg-primary flex items-center justify-center">
                   <Target className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <span className="text-2xl font-black uppercase tracking-tight">Spearfish AI</span>
+                <span className="text-2xl font-black uppercase tracking-tight">SpearfishIn AI</span>
               </div>
               <p className="text-background/70 text-lg">
                 Build your way into top tech companies. No more resume black holes.
@@ -252,7 +252,7 @@ const Index = () => {
             </div>
           </div>
           <div className="pt-8 border-t-2 border-background/20 text-center text-background/60 text-sm">
-            © 2025 Spearfish AI. All rights reserved. Built for builders.
+            © 2025 SpearfishIn AI. All rights reserved. Built for builders.
           </div>
         </div>
       </footer>

@@ -177,7 +177,7 @@ const Profile = () => {
                 <Target className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="text-xl font-black text-foreground uppercase tracking-tight">
-                Spearfish AI
+                SpearfishIn AI
               </span>
             </div>
 
