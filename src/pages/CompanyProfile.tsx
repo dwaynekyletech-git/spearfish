@@ -71,7 +71,7 @@ export default function CompanyProfile() {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <div className="text-2xl">🎯</div>
-              <span className="text-xl font-bold text-foreground">SpearfishIn AI</span>
+              <span className="text-xl font-bold text-foreground">Spearfish</span>
             </Link>
             <nav className="flex items-center gap-6">
               <Link to="/discover" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -154,7 +154,7 @@ export default function CompanyProfile() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="why-spearfish">Why SpearfishIn This?</TabsTrigger>
+            <TabsTrigger value="why-spearfish">Why Spearfish This?</TabsTrigger>
             <TabsTrigger value="technical">Technical Signals</TabsTrigger>
           </TabsList>
 
@@ -304,7 +304,7 @@ export default function CompanyProfile() {
                 className="text-lg h-16 px-12"
                 onClick={() => navigate(`/research/${id}`)}
               >
-                SpearfishIn This Company
+                Spearfish This Company
               </Button>
             </div>
           </CardContent>

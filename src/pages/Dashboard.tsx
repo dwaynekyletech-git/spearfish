@@ -96,7 +96,7 @@ const Dashboard = () => {
     },
     {
       title: "View Portfolio",
-      description: "See all your SpearfishIn targets",
+      description: "See all your spearfishing targets",
       icon: Eye,
       color: "warning",
     },
@@ -113,7 +113,7 @@ const Dashboard = () => {
                 <Target className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="text-xl font-black text-foreground uppercase tracking-tight">
-                SpearfishIn AI
+                Spearfish AI
               </span>
             </div>
 
@@ -246,7 +246,7 @@ const Dashboard = () => {
                   </div>
                   <Button className="w-full" variant="glow" size="sm">
                     <Zap className="w-4 h-4 mr-2" />
-                    SpearfishIn
+                    Spearfish
                   </Button>
                 </CardContent>
               </Card>
