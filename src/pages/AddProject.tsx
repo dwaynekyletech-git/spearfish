@@ -455,32 +455,32 @@ export default function AddProject() {
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-[540px] p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="flex items-center gap-3 text-xl pr-8">
               <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
                 <Save className="h-6 w-6 text-primary" />
               </div>
-              Project Saved Successfully!
+              <span className="break-words">Project Saved Successfully!</span>
             </DialogTitle>
-            <DialogDescription className="pt-3 text-base">
+            <DialogDescription className="text-base leading-relaxed">
               Your project has been added to your portfolio. Would you like to generate an outreach email for this project?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3 mt-4">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
             <Button
               variant="outline"
               onClick={handleGoToProjects}
-              className="w-full sm:flex-1 uppercase font-semibold"
+              className="w-full uppercase font-semibold text-sm"
             >
               No, Go to Projects
             </Button>
             <Button
               onClick={handleGenerateEmail}
-              className="w-full sm:flex-1 uppercase font-semibold"
+              className="w-full uppercase font-semibold text-sm"
             >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Generate Outreach Email
+              <Sparkles className="h-4 w-4 mr-2 shrink-0" />
+              <span className="whitespace-nowrap">Generate Outreach Email</span>
             </Button>
           </DialogFooter>
         </DialogContent>
