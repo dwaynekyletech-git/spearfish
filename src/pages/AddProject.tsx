@@ -455,7 +455,7 @@ export default function AddProject() {
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="max-w-[90vw] sm:max-w-[540px] p-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-[720px] md:max-w-[820px] p-6 overflow-hidden">
           <DialogHeader className="space-y-3">
             <DialogTitle className="flex items-center gap-3 text-xl pr-8">
               <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
@@ -467,17 +467,17 @@ export default function AddProject() {
               Your project has been added to your portfolio. Would you like to generate an outreach email for this project?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between sm:space-x-4 mt-6">
             <Button
               variant="outline"
               onClick={handleGoToProjects}
-              className="w-full sm:w-auto sm:flex-1 uppercase font-semibold text-sm"
+              className="w-full sm:flex-1 uppercase font-semibold text-sm"
             >
               No, Go to Projects
             </Button>
             <Button
               onClick={handleGenerateEmail}
-              className="w-full sm:w-auto sm:flex-1 uppercase font-semibold text-sm justify-center"
+              className="w-full sm:flex-1 uppercase font-semibold text-sm justify-center"
             >
               <Sparkles className="h-4 w-4 mr-2 shrink-0" />
               Generate Outreach Email
