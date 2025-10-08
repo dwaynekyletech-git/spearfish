@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import CompanyDiscovery from "./pages/CompanyDiscovery";
 import CompanyProfile from "./pages/CompanyProfile";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,6 +20,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/discover" element={<CompanyDiscovery />} />
           <Route path="/company/:id" element={<CompanyProfile />} />
