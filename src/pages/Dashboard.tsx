@@ -1,17 +1,8 @@
 import { Link } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Target,
   Building2,
   FolderKanban,
   Mail,
@@ -104,65 +95,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <header className="border-b-2 border-border bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-7xl">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary flex items-center justify-center">
-                <Target className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-black text-foreground uppercase tracking-tight">
-                Spearfish AI
-              </span>
-            </div>
-
-            <nav className="hidden md:flex items-center gap-6">
-              <Link
-                to="/discover"
-                className="text-sm font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-wide"
-              >
-                Browse Companies
-              </Link>
-              <Link
-                to="/dashboard"
-                className="text-sm font-semibold text-primary transition-colors uppercase tracking-wide"
-              >
-                My Projects
-              </Link>
-            </nav>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-12 w-12 rounded-full">
-                <Avatar className="h-12 w-12 border-2 border-primary">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-card" align="end">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
+      <AppHeader user={user} />
 
       <main className="container mx-auto px-4 py-12 max-w-7xl space-y-12">
         {/* Welcome Message */}
@@ -219,37 +152,39 @@ const Dashboard = () => {
               </h2>
               <p className="text-muted-foreground mt-1">Perfect matches based on your profile</p>
             </div>
-            <Button variant="outline" size="sm">
-              View All
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/discover">View All</Link>
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {recommendedStartups.map((startup) => (
-              <Card key={startup.id} className="hover:border-primary transition-all">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <Building2 className="w-6 h-6 text-primary-foreground" />
+              <Link key={startup.id} to={`/company/${startup.id}`}>
+                <Card className="hover:border-primary transition-all h-full">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                        <Building2 className="w-6 h-6 text-primary-foreground" />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="w-4 h-4 text-primary" />
+                        <span className="text-xl font-black text-primary">{startup.score}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4 text-primary" />
-                      <span className="text-xl font-black text-primary">{startup.score}</span>
+                    <CardTitle className="text-xl">{startup.name}</CardTitle>
+                    <CardDescription className="text-sm">{startup.tagline}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="text-xs text-muted-foreground bg-muted px-3 py-2">
+                      {startup.matchReason}
                     </div>
-                  </div>
-                  <CardTitle className="text-xl">{startup.name}</CardTitle>
-                  <CardDescription className="text-sm">{startup.tagline}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-xs text-muted-foreground bg-muted px-3 py-2">
-                    {startup.matchReason}
-                  </div>
-                  <Button className="w-full" variant="glow" size="sm">
-                    <Zap className="w-4 h-4 mr-2" />
-                    Spearfish
-                  </Button>
-                </CardContent>
-              </Card>
+                    <Button className="w-full" variant="glow" size="sm">
+                      <Zap className="w-4 h-4 mr-2" />
+                      Spearfish
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -293,40 +228,53 @@ const Dashboard = () => {
             </div>
 
             <div className="space-y-4">
-              {quickActions.map((action, index) => (
-                <Card
-                  key={index}
-                  className="cursor-pointer hover:border-primary hover:translate-x-1 hover:translate-y-[-4px] transition-all"
-                >
+              <Link to="/discover">
+                <Card className="cursor-pointer hover:border-primary hover:translate-x-1 hover:translate-y-[-4px] transition-all">
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-4">
-                      <div
-                        className={`w-14 h-14 flex items-center justify-center ${
-                          action.color === "primary"
-                            ? "bg-primary"
-                            : action.color === "accent"
-                            ? "bg-accent"
-                            : "bg-warning"
-                        }`}
-                      >
-                        <action.icon
-                          className={`w-7 h-7 ${
-                            action.color === "primary"
-                              ? "text-primary-foreground"
-                              : action.color === "accent"
-                              ? "text-accent-foreground"
-                              : "text-warning-foreground"
-                          }`}
-                        />
+                      <div className="w-14 h-14 flex items-center justify-center bg-primary">
+                        <Search className="w-7 h-7 text-primary-foreground" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-foreground text-lg">{action.title}</h3>
-                        <p className="text-sm text-muted-foreground">{action.description}</p>
+                        <h3 className="font-bold text-foreground text-lg">Discover New Startups</h3>
+                        <p className="text-sm text-muted-foreground">Find companies that match your skills</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              </Link>
+
+              <Link to="/add-project">
+                <Card className="cursor-pointer hover:border-primary hover:translate-x-1 hover:translate-y-[-4px] transition-all">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 flex items-center justify-center bg-accent">
+                        <Plus className="w-7 h-7 text-accent-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-foreground text-lg">Add a Project</h3>
+                        <p className="text-sm text-muted-foreground">Showcase your latest work</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link to="/portfolio">
+                <Card className="cursor-pointer hover:border-primary hover:translate-x-1 hover:translate-y-[-4px] transition-all">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 flex items-center justify-center bg-warning">
+                        <Eye className="w-7 h-7 text-warning-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-foreground text-lg">View Portfolio</h3>
+                        <p className="text-sm text-muted-foreground">See all your spearfishing targets</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </div>
         </div>

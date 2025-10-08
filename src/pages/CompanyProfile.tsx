@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ExternalLink, Calendar, Users, Briefcase, TrendingUp, CheckCircle, Github, Download, Video, Target } from "lucide-react";
+import { AppHeader } from "@/components/AppHeader";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,10 +53,15 @@ const mockCompanyData: Record<string, any> = {
 
 export default function CompanyProfile() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("about");
   
   const company = mockCompanyData[id || "1"] || mockCompanyData["1"];
+
+  const user = {
+    name: "Alex Chen",
+    email: "alex@example.com",
+    avatar: "",
+  };
 
   const stats = [
     { label: "Batch", value: company.batch, icon: TrendingUp },
@@ -65,32 +72,19 @@ export default function CompanyProfile() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="text-2xl">🎯</div>
-              <span className="text-xl font-bold text-foreground">Spearfish</span>
-            </Link>
-            <nav className="flex items-center gap-6">
-              <Link to="/discover" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Browse Companies
-              </Link>
-              <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                My Projects
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <AppHeader user={user} currentPage="discover" />
 
       <div className="container mx-auto px-6 py-8 max-w-6xl">
-        {/* Back Button */}
-        <Link to="/discover" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Discovery
-        </Link>
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: "Discover", href: "/discover" },
+              { label: company.name },
+            ]}
+          />
+        </div>
 
         {/* Header */}
         <div className="mb-8">
@@ -299,13 +293,14 @@ export default function CompanyProfile() {
               <p className="text-muted-foreground mb-6">
                 Start the research process and build a project that will get you noticed by {company.name}
               </p>
-              <Button 
-                size="lg" 
-                className="text-lg h-16 px-12"
-                onClick={() => navigate(`/research/${id}`)}
-              >
-                Spearfish This Company
-              </Button>
+              <Link to={`/research/${id}`}>
+                <Button 
+                  size="lg" 
+                  className="text-lg h-16 px-12"
+                >
+                  Spearfish This Company
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

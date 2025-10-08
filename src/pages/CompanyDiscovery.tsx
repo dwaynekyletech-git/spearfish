@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, Building2, Users, GitBranch, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AppHeader } from "@/components/AppHeader";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -108,6 +110,12 @@ export default function CompanyDiscovery() {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("score");
 
+  const user = {
+    name: "Alex Chen",
+    email: "alex@example.com",
+    avatar: "",
+  };
+
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries(prev =>
       prev.includes(industry)
@@ -147,27 +155,19 @@ export default function CompanyDiscovery() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="text-2xl">🎯</div>
-              <span className="text-xl font-bold text-foreground">Spearfish</span>
-            </Link>
-            <nav className="flex items-center gap-6">
-              <Link to="/discover" className="text-sm font-medium text-primary">
-                Browse Companies
-              </Link>
-              <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                My Projects
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <AppHeader user={user} currentPage="discover" />
 
       <div className="container mx-auto px-6 py-8">
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: "Discover Companies" },
+            ]}
+          />
+        </div>
+
         {/* Top Bar */}
         <div className="mb-8 flex items-center justify-between">
           <div>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { AppHeader } from "@/components/AppHeader";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -131,10 +133,15 @@ const mockResearchData = {
 
 export default function Research() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [researchData, setResearchData] = useState<typeof mockResearchData | null>(null);
+
+  const user = {
+    name: "Alex Chen",
+    email: "alex@example.com",
+    avatar: "",
+  };
 
   useEffect(() => {
     // Simulate loading with rotating messages
@@ -188,17 +195,27 @@ export default function Research() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      <AppHeader user={user} />
+      
       <div className="container max-w-5xl mx-auto px-4 py-8 space-y-8">
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          items={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Discover", href: "/discover" },
+            { label: "Company", href: `/company/${id}` },
+            { label: "Research" },
+          ]}
+        />
+        
         {/* Header */}
         <div className="space-y-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(`/company/${id}`)}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Company
-          </Button>
+          <Link to={`/company/${id}`}>
+            <Button variant="ghost" className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Company
+            </Button>
+          </Link>
           <div>
             <h1 className="text-4xl font-bold mb-2">Deep Research Report</h1>
             <p className="text-muted-foreground">
@@ -396,31 +413,25 @@ export default function Research() {
 
         {/* Bottom Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate(`/company/${id}`)}
-            className="w-full sm:w-auto"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Company
-          </Button>
+          <Link to={`/company/${id}`}>
+            <Button variant="outline" className="w-full sm:w-auto">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Company
+            </Button>
+          </Link>
           
           <div className="flex gap-3 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              className="flex-1 sm:flex-none"
-            >
+            <Button variant="outline" className="flex-1 sm:flex-none">
               <Save className="h-4 w-4 mr-2" />
               Save Research
             </Button>
             
-            <Button
-              onClick={() => navigate(`/projects/${id}`)}
-              className="flex-1 sm:flex-none"
-            >
-              <Lightbulb className="h-4 w-4 mr-2" />
-              Generate Project Ideas
-            </Button>
+            <Link to={`/projects/${id}`}>
+              <Button className="flex-1 sm:flex-none">
+                <Lightbulb className="h-4 w-4 mr-2" />
+                Generate Project Ideas
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

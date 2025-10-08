@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Target, Search, Code, Send, TrendingDown, Users, FileX, Zap, Sparkles, ArrowRight } from "lucide-react";
@@ -13,9 +14,11 @@ const Index = () => {
             <div className="w-10 h-10 bg-primary flex items-center justify-center">
               <Target className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-black text-foreground uppercase tracking-tight">Spearfish AI</span>
+            <span className="text-2xl font-black text-foreground uppercase tracking-tight">SpearfishIn AI</span>
           </div>
-          <Button variant="glow" size="default">Get Started</Button>
+          <Link to="/auth">
+            <Button variant="glow" size="default">Get Started</Button>
+          </Link>
         </div>
       </header>
 
@@ -42,10 +45,12 @@ const Index = () => {
               </p>
               
               <div className="flex flex-wrap gap-6">
-                <Button variant="glow" size="lg" className="group">
-                  Get Started Free
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
+                <Link to="/auth">
+                  <Button variant="glow" size="lg" className="group">
+                    Get Started Free
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
                 <Button size="lg" variant="outline">Watch Demo</Button>
               </div>
               
@@ -211,10 +216,12 @@ const Index = () => {
             Join 2,000+ developers who've stopped applying and started building their way into top startups
           </p>
           <div className="flex flex-wrap gap-6 justify-center">
-            <Button size="lg" className="bg-background text-foreground hover:bg-background/90 hover:scale-105 border-4 border-background text-xl">
-              Start Building Now
-              <ArrowRight className="w-6 h-6" />
-            </Button>
+            <Link to="/auth">
+              <Button size="lg" className="bg-background text-foreground hover:bg-background/90 hover:scale-105 border-4 border-background text-xl">
+                Start Building Now
+                <ArrowRight className="w-6 h-6" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -228,7 +235,7 @@ const Index = () => {
                 <div className="w-10 h-10 bg-primary flex items-center justify-center">
                   <Target className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <span className="text-2xl font-black uppercase tracking-tight">Spearfish AI</span>
+                <span className="text-2xl font-black uppercase tracking-tight">SpearfishIn AI</span>
               </div>
               <p className="text-background/70 text-lg">
                 Build your way into top tech companies. No more resume black holes.
@@ -252,7 +259,7 @@ const Index = () => {
             </div>
           </div>
           <div className="pt-8 border-t-2 border-background/20 text-center text-background/60 text-sm">
-            © 2025 Spearfish AI. All rights reserved. Built for builders.
+            © 2025 SpearfishIn AI. All rights reserved. Built for builders.
           </div>
         </div>
       </footer>

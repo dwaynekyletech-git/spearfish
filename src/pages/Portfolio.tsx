@@ -1,20 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
+import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Target,
   Building2,
   Plus,
   Share2,
@@ -42,7 +33,6 @@ interface Project {
 }
 
 const Portfolio = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeFilter, setActiveFilter] = useState<"all" | "no-response" | "interview" | "hired">("all");
 
@@ -145,71 +135,7 @@ const Portfolio = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <header className="border-b-2 border-border bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-7xl">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary flex items-center justify-center">
-                <Target className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-black text-foreground uppercase tracking-tight">
-                Spearfish AI
-              </span>
-            </div>
-
-            <nav className="hidden md:flex items-center gap-6">
-              <Link
-                to="/discover"
-                className="text-sm font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-wide"
-              >
-                Browse Companies
-              </Link>
-              <Link
-                to="/dashboard"
-                className="text-sm font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-wide"
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/portfolio"
-                className="text-sm font-semibold text-primary transition-colors uppercase tracking-wide"
-              >
-                My Projects
-              </Link>
-            </nav>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-12 w-12 rounded-full">
-                <Avatar className="h-12 w-12 border-2 border-primary">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-card" align="end">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
+      <AppHeader user={user} currentPage="portfolio" />
 
       <main className="container mx-auto px-4 py-12 max-w-7xl space-y-8">
         {/* Header */}
@@ -227,7 +153,7 @@ const Portfolio = () => {
               <Share2 className="w-4 h-4 mr-2" />
               Share Portfolio
             </Button>
-            <Button onClick={() => navigate("/add-project")}>
+            <Button onClick={() => window.location.href = "/add-project"}>
               <Plus className="w-4 h-4 mr-2" />
               Add New Project
             </Button>
@@ -248,14 +174,18 @@ const Portfolio = () => {
                 </p>
               </div>
               <div className="flex items-center gap-3 justify-center">
-                <Button variant="outline" onClick={() => navigate("/discover")}>
-                  <Search className="w-4 h-4 mr-2" />
-                  Browse Companies
-                </Button>
-                <Button onClick={() => navigate("/add-project")}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Project
-                </Button>
+                <Link to="/discover">
+                  <Button variant="outline">
+                    <Search className="w-4 h-4 mr-2" />
+                    Browse Companies
+                  </Button>
+                </Link>
+                <Link to="/add-project">
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Project
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -343,14 +273,12 @@ const Portfolio = () => {
                     </div>
 
                     <div className="flex items-center gap-2 pt-2 border-t">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/add-project?edit=${project.id}`)}
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
+                      <Link to={`/add-project?edit=${project.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                      </Link>
                       <Button
                         variant="ghost"
                         size="sm"
