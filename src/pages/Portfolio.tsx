@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Target,
   Building2,
   Plus,
   Share2,
@@ -24,7 +25,6 @@ import {
   Search,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import spearfishLogo from "@/assets/spearfish-logo.png";
 
 interface Project {
   id: number;
@@ -150,7 +150,9 @@ const Portfolio = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-7xl">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <img src={spearfishLogo} alt="Spearfish AI Logo" className="w-10 h-10" />
+              <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                <Target className="w-6 h-6 text-primary-foreground" />
+              </div>
               <span className="text-xl font-black text-foreground uppercase tracking-tight">
                 Spearfish AI
               </span>

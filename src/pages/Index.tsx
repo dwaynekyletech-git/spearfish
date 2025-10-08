@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search, Code, Send, TrendingDown, Users, FileX, Zap, Sparkles, ArrowRight, Target } from "lucide-react";
+import { Target, Search, Code, Send, TrendingDown, Users, FileX, Zap, Sparkles, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-illustration.jpg";
-import spearfishLogo from "@/assets/spearfish-logo.png";
 
 const Index = () => {
   return (
@@ -11,7 +10,9 @@ const Index = () => {
       <header className="border-b-2 border-border bg-background sticky top-0 z-50">
         <div className="container mx-auto px-4 py-6 flex items-center justify-between max-w-7xl">
           <div className="flex items-center gap-3">
-            <img src={spearfishLogo} alt="Spearfish AI Logo" className="w-10 h-10" />
+            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+              <Target className="w-6 h-6 text-primary-foreground" />
+            </div>
             <span className="text-2xl font-black text-foreground uppercase tracking-tight">Spearfish AI</span>
           </div>
           <Button variant="glow" size="default">Get Started</Button>
@@ -224,7 +225,9 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-12 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <img src={spearfishLogo} alt="Spearfish AI Logo" className="w-10 h-10" />
+                <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                  <Target className="w-6 h-6 text-primary-foreground" />
+                </div>
                 <span className="text-2xl font-black uppercase tracking-tight">Spearfish AI</span>
               </div>
               <p className="text-background/70 text-lg">
