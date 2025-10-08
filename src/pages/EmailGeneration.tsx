@@ -25,7 +25,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import {
-  Target,
   Copy,
   Edit,
   Check,
@@ -34,6 +33,7 @@ import {
   Save,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import spearfishLogo from "@/assets/spearfish-logo.png";
 
 interface EmailVariation {
   id: string;
@@ -216,9 +216,7 @@ ${user.name}`,
         <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-7xl">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary flex items-center justify-center">
-                <Target className="w-6 h-6 text-primary-foreground" />
-              </div>
+              <img src={spearfishLogo} alt="Spearfish AI Logo" className="w-10 h-10" />
               <span className="text-xl font-black text-foreground uppercase tracking-tight">
                 Spearfish AI
               </span>
