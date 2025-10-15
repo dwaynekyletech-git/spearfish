@@ -1,27 +1,19 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { SignIn, SignUp, useAuth } from "@clerk/clerk-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Target } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Auth = () => {
+  const { isSignedIn } = useAuth();
   const navigate = useNavigate();
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Placeholder - for new users go to onboarding, returning users to dashboard
-    if (isSignUp) {
-      navigate("/onboarding");
-    } else {
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (isSignedIn) {
       navigate("/dashboard");
     }
-  };
+  }, [isSignedIn, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -34,68 +26,43 @@ const Auth = () => {
             <span className="text-3xl font-black text-foreground uppercase tracking-tight">SpearfishIn AI</span>
           </div>
           <h1 className="text-4xl font-black text-foreground mb-2">
-            {isSignUp ? "Create Account" : "Welcome Back"}
+            Welcome
           </h1>
           <p className="text-muted-foreground text-lg">
-            {isSignUp ? "Start building your way into top companies" : "Sign in to continue building"}
+            Sign in or create an account to get started
           </p>
         </div>
 
-        <Card className="p-8 border-2 border-border">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" variant="glow" className="w-full" size="lg">
-              {isSignUp ? "Create Account" : "Sign In"}
-            </Button>
-          </form>
-        </Card>
-
-        <p className="text-center text-muted-foreground text-sm">
-          {isSignUp ? "Already have an account? " : "Don't have an account? "}
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-primary font-bold hover:underline"
-          >
-            {isSignUp ? "Sign in" : "Sign up"}
-          </button>
-        </p>
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          <TabsContent value="signin" className="mt-6">
+            <SignIn 
+              routing="hash"
+              afterSignInUrl="/dashboard"
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "shadow-none border-2 border-border",
+                }
+              }}
+            />
+          </TabsContent>
+          <TabsContent value="signup" className="mt-6">
+            <SignUp 
+              routing="hash"
+              afterSignUpUrl="/onboarding"
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "shadow-none border-2 border-border",
+                }
+              }}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

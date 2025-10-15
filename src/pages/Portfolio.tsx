@@ -192,7 +192,7 @@ const Portfolio = () => {
         ) : (
           <>
             {/* Filter Tabs */}
-            <Tabs value={activeFilter} onValueChange={(v) => setActiveFilter(v as any)}>
+            <Tabs value={activeFilter} onValueChange={(v) => setActiveFilter(v as "all" | "no-response" | "interview" | "hired")}>
               <TabsList className="grid w-full max-w-2xl grid-cols-4">
                 <TabsTrigger value="all" className="font-semibold">
                   All Projects

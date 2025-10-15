@@ -9,8 +9,51 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 
+interface Company {
+  id: number;
+  name: string;
+  slug: string;
+  one_liner: string;
+  long_description: string;
+  small_logo_thumb_url: string;
+  website: string;
+  all_locations: string[];
+  batch: string;
+  stage: string;
+  team_size: number;
+  industries: string[];
+  launched_at: string;
+  url: string;
+  isHiring: boolean;
+  founded: string;
+  score: number;
+  mission: string;
+  scoreBreakdown: Array<{
+    factor: string;
+    points: number;
+    maxPoints: number;
+  }>;
+  technicalSignals: {
+    github: Array<{
+      name: string;
+      stars: number;
+      description: string;
+    }>;
+    huggingface: Array<{
+      name: string;
+      downloads: string;
+      description: string;
+    }>;
+    conferences: Array<{
+      event: string;
+      talk: string;
+      speaker: string;
+    }>;
+  };
+}
+
 // Mock data - would come from API in real app
-const mockCompanyData: Record<string, any> = {
+const mockCompanyData: Record<string, Company> = {
   "1": {
     id: 1,
     name: "PathAI",
@@ -188,7 +231,7 @@ export default function CompanyProfile() {
                 <p className="text-sm text-muted-foreground">Understanding why this is a great opportunity</p>
               </CardHeader>
               <CardContent className="space-y-6">
-                {company.scoreBreakdown.map((item: any, index: number) => (
+                {company.scoreBreakdown.map((item, index) => (
                   <div key={index} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-start gap-2 flex-1">
@@ -226,7 +269,7 @@ export default function CompanyProfile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {company.technicalSignals.github.map((repo: any, index: number) => (
+                {company.technicalSignals.github.map((repo, index) => (
                   <div key={index} className="flex items-start justify-between p-4 bg-muted/50 hover:bg-muted transition-colors">
                     <div className="flex-1">
                       <p className="font-medium text-foreground mb-1">{repo.name}</p>
@@ -250,7 +293,7 @@ export default function CompanyProfile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {company.technicalSignals.huggingface.map((model: any, index: number) => (
+                {company.technicalSignals.huggingface.map((model, index) => (
                   <div key={index} className="flex items-start justify-between p-4 bg-muted/50 hover:bg-muted transition-colors">
                     <div className="flex-1">
                       <p className="font-medium text-foreground mb-1">{model.name}</p>
@@ -273,7 +316,7 @@ export default function CompanyProfile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {company.technicalSignals.conferences.map((conf: any, index: number) => (
+                {company.technicalSignals.conferences.map((conf, index) => (
                   <div key={index} className="p-4 bg-muted/50 hover:bg-muted transition-colors">
                     <div className="flex items-start justify-between mb-2">
                       <Badge variant="outline">{conf.event}</Badge>

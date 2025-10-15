@@ -134,7 +134,7 @@ export default function AddProject() {
     }
   }, [searchParams]);
 
-  const handleInputChange = (field: keyof FormData, value: any) => {
+  const handleInputChange = (field: keyof FormData, value: FormData[keyof FormData]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {

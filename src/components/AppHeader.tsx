@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Target } from "lucide-react";
+import { useClerk } from "@clerk/clerk-react";
 
 interface AppHeaderProps {
   user?: {
@@ -22,9 +23,10 @@ interface AppHeaderProps {
 
 export function AppHeader({ user, currentPage }: AppHeaderProps) {
   const navigate = useNavigate();
+  const { signOut } = useClerk();
 
-  const handleLogout = () => {
-    // Placeholder logout logic
+  const handleLogout = async () => {
+    await signOut();
     navigate("/");
   };
 

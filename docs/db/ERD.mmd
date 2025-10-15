@@ -1,0 +1,111 @@
+# ER Diagram (Mermaid)
+
+erDiagram
+  USERS ||--o{ USER_SAVED_COMPANIES : saves
+  USERS ||--o{ COMPANY_RESEARCH : researches
+  USERS ||--o{ PROJECT_IDEAS : creates
+  USERS ||--o{ PROJECTS : owns
+  USERS ||--o{ OUTREACH_EMAILS : sends
+  COMPANIES ||--o{ USER_SAVED_COMPANIES : saved
+  COMPANIES ||--o{ COMPANY_RESEARCH : researched
+  COMPANIES ||--o{ PROJECT_IDEAS : targets
+  PROJECTS ||--o{ OUTREACH_EMAILS : referenced
+
+  USERS {
+    uuid user_id PK
+    text full_name
+    text job_title
+    text[] skills
+    text[] career_interests
+    text[] target_roles
+    text resume_url
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  COMPANIES {
+    uuid id PK
+    text name
+    text website
+    text industry
+    text size
+    text[] tech_stack
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  USER_SAVED_COMPANIES {
+    uuid id PK
+    uuid user_id FK
+    uuid company_id FK
+    timestamptz created_at
+  }
+
+  COMPANY_RESEARCH {
+    uuid id PK
+    uuid user_id FK
+    uuid company_id FK
+    jsonb business_intel
+    jsonb technical_landscape
+    jsonb key_people
+    jsonb opportunity_signals
+    jsonb pain_points
+    timestamptz created_at
+  }
+
+  PROJECT_IDEAS {
+    uuid id PK
+    uuid user_id FK
+    uuid company_id FK
+    text title
+    text description
+    text impact_level
+    text[] technologies
+    text time_estimate
+    text expected_impact
+    timestamptz created_at
+  }
+
+  PROJECTS {
+    uuid id PK
+    uuid user_id FK
+    text title
+    text description
+    text status
+    text github_url
+    text deployment_url
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  OUTREACH_EMAILS {
+    uuid id PK
+    uuid user_id FK
+    uuid company_id FK
+    uuid project_id FK
+    text subject
+    text body
+    text tone
+    timestamptz sent_at
+    timestamptz created_at
+  }
+
+  VOLTAGENT_EXECUTIONS {
+    uuid id PK
+    uuid user_id FK
+    text agent_name
+    jsonb input
+    jsonb output
+    boolean success
+    text error
+    timestamptz created_at
+  }
+
+  CLERK_WEBHOOK_EVENTS {
+    uuid id PK
+    uuid user_id FK
+    text event_type
+    jsonb payload
+    timestamptz received_at
+    text status
+  }
