@@ -1,0 +1,1157 @@
+# SpearfishIn AI - Product Requirements Document
+
+## Overview
+
+SpearfishIn AI is a career acceleration platform that revolutionizes the job application process for developers by enabling them to build targeted solutions for companies rather than sending traditional resumes. The platform leverages AI to help developers research companies, identify pain points, generate project ideas, build solutions, and craft personalized outreach campaigns.
+
+**Problem:** The traditional job application process is broken. Developers face:
+- High volume competition (500+ applicants per role)
+- Low response rates from cold applications
+- AI automation replacing entry-level positions
+- Difficulty standing out in crowded applicant pools
+
+**Solution:** SpearfishIn AI implements "The Spearfishing Method" - a strategic approach where developers:
+1. Discover companies aligned with their skills and interests
+2. Research company pain points and technical landscape
+3. Build targeted solutions addressing specific problems
+4. Execute personalized outreach demonstrating value upfront
+
+**Target Users:** Junior to mid-level developers seeking to:
+- Stand out in competitive job markets
+- Demonstrate skills through practical projects
+- Build a portfolio of targeted solutions
+- Secure interviews through value-first approaches
+
+**Value Proposition:** Replace passive resume submissions with proactive value demonstration, dramatically increasing interview conversion rates by showcasing problem-solving abilities before the first conversation.
+
+---
+
+## Core Features
+
+### 1. User Onboarding & Profile Management
+**What it does:**
+- Collects developer skills, interests, and career goals
+- Captures target roles and technical expertise
+- Allows resume upload for context
+- Builds comprehensive user profile
+
+**Why it's important:**
+- Enables personalized company matching
+- Powers AI-driven recommendations
+- Creates baseline for project suggestions
+- Establishes user context for all platform interactions
+
+**How it works:**
+- Multi-step form with progress tracking
+- Skill/interest tag selection with suggestions
+- Target role specification
+- Drag-and-drop resume upload
+- Profile stored for ongoing personalization
+
+### 2. Company Discovery
+**What it does:**
+- AI-powered company search and filtering
+- Matches companies to user skills and interests
+- Displays company cards with key information
+- Provides company categorization and tech stack visibility
+
+**Why it's important:**
+- Reduces time spent researching potential employers
+- Ensures alignment between developer skills and company needs
+- Surfaces opportunities beyond traditional job boards
+- Creates targeted list for strategic outreach
+
+**How it works:**
+- AI analyzes user profile and generates company matches
+- Displays cards with company name, description, tech stack, size
+- Filter options for industry, size, tech stack
+- Save/bookmark companies for later research
+- Direct navigation to detailed company profiles
+
+### 3. Deep Company Research
+**What it does:**
+- AI-generated comprehensive company intelligence
+- Business model and revenue analysis
+- Technical landscape and stack documentation
+- Key personnel identification
+- Pain point and opportunity signal detection
+
+**Why it's important:**
+- Provides context needed to identify meaningful problems
+- Reveals technical architecture for relevant project ideas
+- Identifies decision makers for outreach
+- Surfaces urgent opportunities and challenges
+
+**How it works:**
+- Scrapes public company data, news, and technical blogs
+- AI analyzes and synthesizes information into structured reports
+- Sections: Business Intelligence, Technical Landscape, Key People, Opportunity Signals
+- Prioritized pain points summary with severity ratings
+- Exportable research for reference during project building
+
+### 4. AI-Powered Project Idea Generation
+**What it does:**
+- Generates 3-5 targeted project ideas per company
+- Aligns suggestions with detected pain points
+- Estimates project scope and impact
+- Suggests relevant technologies
+
+**Why it's important:**
+- Eliminates "blank page" problem for developers
+- Ensures projects address actual company needs
+- Provides clear direction for value demonstration
+- Accelerates transition from research to building
+
+**How it works:**
+- AI analyzes company research and user skills
+- Generates project ideas with titles, descriptions, technologies
+- Displays impact level (High/Medium/Low)
+- Shows expected outcomes and time estimates
+- Allows regeneration for alternative ideas
+- One-click selection to add project to portfolio
+
+### 5. Project Portfolio Management
+**What it does:**
+- Centralized dashboard for all projects
+- Project status tracking (In Progress, Completed, Pitched)
+- Company associations and project details
+- GitHub repo linking and deployment URLs
+
+**Why it's important:**
+- Organizes developer's strategic job search efforts
+- Tracks progress across multiple opportunities
+- Demonstrates systematic approach to employers
+- Provides evidence of consistent value creation
+
+**How it works:**
+- Visual project cards with status badges
+- Filter and sort by status, company, date
+- Manual project addition for custom ideas
+- Integration with project idea generator
+- Links to live demos and source code
+- Analytics on project views and engagement
+
+### 6. Personalized Email Generation
+**What it does:**
+- AI-crafted personalized outreach emails
+- References specific company research
+- Highlights relevant project work
+- Includes compelling calls-to-action
+
+**Why it's important:**
+- Dramatically increases response rates vs generic emails
+- Demonstrates research and genuine interest
+- Positions developer as proactive problem solver
+- Reduces time spent writing individual outreach
+
+**How it works:**
+- AI combines user profile, company research, and project details
+- Generates email with personalized hooks
+- References specific pain points and solutions
+- Includes project links and portfolio references
+- Copy-to-clipboard functionality
+- Regeneration option for tone/approach variations
+
+### 7. Dashboard & Activity Hub
+**What it does:**
+- Central command center for all platform activities
+- Quick actions for core workflows
+- Overview of saved companies and projects
+- Recent activity and recommendations
+
+**Why it's important:**
+- Single source of truth for job search progress
+- Reduces friction in workflow navigation
+- Surfaces next actions to maintain momentum
+- Provides progress visibility and motivation
+
+**How it works:**
+- Welcome message with user name
+- Quick action cards for Discover, Research, Build, Outreach
+- Saved companies list with research/project status
+- Recent projects with status indicators
+- AI-generated next steps recommendations
+
+---
+
+## User Experience
+
+### User Personas
+
+**1. Career-Switching Junior Developer**
+- **Background:** Recently completed bootcamp or self-taught
+- **Goals:** Land first developer role, build portfolio
+- **Pain Points:** No professional experience, generic resume ignored
+- **Use Case:** Discover 10-15 target companies, build 2-3 projects, demonstrate learning ability
+
+**2. Experienced Developer Seeking Level-Up**
+- **Background:** 2-4 years experience, looking for senior role
+- **Goals:** Demonstrate thought leadership, strategic thinking
+- **Pain Points:** Stuck in current role, need to show advanced capabilities
+- **Use Case:** Target dream companies, build complex solutions, showcase architecture skills
+
+**3. Specialized Technical Expert**
+- **Background:** Deep expertise in specific domain (ML, blockchain, etc.)
+- **Goals:** Find companies working on cutting-edge problems
+- **Pain Points:** Limited relevant opportunities on job boards
+- **Use Case:** Discover niche companies, demonstrate specialized knowledge through technical projects
+
+### Key User Flows
+
+**Flow 1: Complete First Project Cycle**
+1. User completes onboarding (5 minutes)
+2. Navigates to Company Discovery
+3. Reviews AI-suggested companies, saves 3-5 interesting matches
+4. Selects first company to research
+5. Reviews generated research report (3-5 minutes reading)
+6. Clicks "Generate Project Ideas"
+7. Reviews 5 project suggestions, selects most compelling
+8. Project added to portfolio, navigates to add details
+9. Builds project over next few days
+10. Returns to generate outreach email
+11. Sends personalized email with project link
+12. Tracks response in dashboard
+
+**Flow 2: Rapid Multi-Company Targeting**
+1. User logs into dashboard
+2. Clicks "Discover Companies" quick action
+3. Filters for specific industry/tech stack
+4. Bulk-saves 10 companies
+5. Initiates research on 3 companies simultaneously
+6. Reviews research reports, identifies best opportunity
+7. Generates project ideas for top choice
+8. Adds project to portfolio
+9. Repeats for other researched companies
+10. Works on multiple projects in parallel
+
+**Flow 3: Custom Project Addition**
+1. User has existing project relevant to target company
+2. Navigates to Portfolio
+3. Clicks "Add Custom Project"
+4. Fills in project details, GitHub repo, live URL
+5. Associates with target company
+6. Navigates to email generation
+7. AI incorporates custom project into outreach
+8. Sends email with existing work
+
+### UI/UX Considerations
+
+**Design Principles:**
+- **Clarity over cleverness:** Every action has clear purpose and outcome
+- **Progressive disclosure:** Don't overwhelm with all options upfront
+- **Momentum maintenance:** Always show next step to keep users moving
+- **Visual feedback:** Confirm actions, show progress, celebrate wins
+
+**Visual Design:**
+- Modern gradient aesthetics (green/coral color scheme)
+- Card-based layouts for scanability
+- Badge system for status and metadata
+- Responsive design for mobile research on-the-go
+- Dark mode support for developer comfort
+
+**Interaction Patterns:**
+- Breadcrumb navigation for deep flows
+- Toast notifications for confirmations
+- Loading states with motivational messages
+- One-click actions for common workflows
+- Keyboard shortcuts for power users (future)
+
+**Accessibility:**
+- Semantic HTML structure
+- ARIA labels for screen readers
+- Keyboard navigation support
+- Color contrast compliance
+- Focus indicators on interactive elements
+
+---
+
+## Technical Architecture
+
+### System Components
+
+**Frontend (React + TypeScript)**
+- Single-page application with client-side routing
+- Vite build system for fast development and optimized production
+- Tailwind CSS with custom design system
+- shadcn-ui component library for consistent UI
+- React Query for data fetching and caching
+
+**Backend (Supabase + Clerk)**
+- PostgreSQL database for structured data storage
+- Row Level Security (RLS) for data isolation
+- Supabase Edge Functions for serverless API logic
+- Supabase Storage for resume uploads and project assets
+- Real-time subscriptions using Supabase Realtime
+- Database triggers for automated workflows
+
+**Authentication (Clerk)**
+- Email/password, social OAuth, and magic link authentication
+- User management with profiles and metadata
+- Session management and JWT tokens
+- Webhook integration for user lifecycle events
+- Organization support for future team features
+
+**AI Agent Framework (Voltagent)**
+- Multi-agent orchestration system for complex workflows
+- Deep Research Agent for company intelligence gathering
+- Project Generator Agent for AI-powered project suggestions
+- Email Outreach Agent for personalized message generation
+- Context persistence between agent interactions
+- Custom tool integration for web scraping and external APIs
+- Streaming responses for real-time user feedback
+
+### Data Models
+
+**users**
+```
+id: uuid (primary key)
+clerk_user_id: string (unique, from Clerk)
+email: string
+full_name: string
+job_title: string
+skills: string[]
+interests: string[]
+target_roles: string[]
+resume_url: string
+created_at: timestamp
+updated_at: timestamp
+```
+
+**companies**
+```
+id: uuid (primary key)
+name: string
+description: text
+website: string
+industry: string
+size: string
+tech_stack: string[]
+logo_url: string
+created_at: timestamp
+```
+
+**user_saved_companies**
+```
+id: uuid (primary key)
+user_id: uuid (foreign key)
+company_id: uuid (foreign key)
+saved_at: timestamp
+```
+
+**company_research**
+```
+id: uuid (primary key)
+company_id: uuid (foreign key)
+user_id: uuid (foreign key)
+business_intelligence: jsonb
+technical_landscape: jsonb
+key_people: jsonb
+opportunity_signals: jsonb
+pain_points_summary: jsonb
+generated_at: timestamp
+```
+
+**project_ideas**
+```
+id: uuid (primary key)
+company_id: uuid (foreign key)
+user_id: uuid (foreign key)
+title: string
+description: text
+impact: string (high/medium/low)
+problem_solved: text
+technologies: string[]
+time_estimate: string
+expected_impact: text
+generated_at: timestamp
+```
+
+**projects**
+```
+id: uuid (primary key)
+user_id: uuid (foreign key)
+company_id: uuid (foreign key)
+project_idea_id: uuid (foreign key, nullable)
+title: string
+description: text
+technologies: string[]
+github_url: string
+live_url: string
+status: string (in_progress/completed/pitched)
+created_at: timestamp
+updated_at: timestamp
+```
+
+**outreach_emails**
+```
+id: uuid (primary key)
+user_id: uuid (foreign key)
+company_id: uuid (foreign key)
+project_id: uuid (foreign key, nullable)
+email_content: text
+sent_at: timestamp
+response_received: boolean
+```
+
+**voltagent_executions**
+```
+id: uuid (primary key)
+user_id: uuid (foreign key)
+agent_type: string (research/project_generator/email_outreach)
+execution_context: jsonb
+input_data: jsonb
+output_data: jsonb
+status: string (pending/running/completed/failed)
+started_at: timestamp
+completed_at: timestamp
+error_message: text
+```
+
+**clerk_webhook_events**
+```
+id: uuid (primary key)
+event_type: string
+clerk_user_id: string
+event_data: jsonb
+processed: boolean
+received_at: timestamp
+processed_at: timestamp
+```
+
+### APIs and Integrations
+
+**Supabase Edge Functions**
+- `/voltagent/research` - Trigger Deep Research Agent for company analysis
+- `/voltagent/project-generator` - Trigger Project Generator Agent
+- `/voltagent/email-outreach` - Trigger Email Outreach Agent
+- `/company-matches` - AI-powered company discovery
+- `/clerk/webhook` - Handle Clerk user lifecycle events
+- `/streaming/agent-status` - Real-time agent execution updates
+
+**External Integrations**
+- Clearbit / Similar API for company data enrichment
+- LinkedIn API for key personnel identification
+- GitHub API for tech stack detection
+- Email validation services for outreach quality
+- Voltagent API for agent orchestration and execution
+
+**Authentication Flow (Clerk)**
+- Email/password, social OAuth (Google, GitHub, LinkedIn), magic links
+- Session management with Clerk-issued JWT tokens
+- User profile management and metadata storage
+- Organization support for team features
+- Webhook events for user creation, updates, deletion
+
+### Infrastructure Requirements
+
+**Hosting & Deployment**
+- Vercel or Netlify for frontend hosting and deployment
+- Supabase for backend infrastructure and database
+- Clerk for authentication infrastructure
+- CDN for asset delivery and global performance
+- SSL certificates and security headers
+
+**Performance**
+- Lazy loading for route-based code splitting
+- Image optimization and lazy loading
+- API response caching with React Query
+- Database query optimization with indexes
+
+**Monitoring & Analytics**
+- Error tracking and logging
+- User behavior analytics
+- AI usage and token consumption tracking
+- Performance monitoring (Core Web Vitals)
+
+**Security**
+- Row Level Security on all database tables
+- Input validation and sanitization
+- Rate limiting on AI endpoints
+- Secure credential storage in Supabase secrets
+
+---
+
+## Development Roadmap
+
+### Phase 1: Foundation & MVP (Core User Journey)
+
+**Goal:** Enable users to complete one full cycle from onboarding through outreach
+
+**Features:**
+1. **Authentication System (Clerk)**
+   - Email/password, social OAuth, and magic link authentication
+   - User profile creation and management
+   - Protected routes with Clerk session management
+   - Webhook integration for user lifecycle events
+
+2. **Onboarding Flow**
+   - Multi-step form with all 5 sections
+   - Profile data storage
+   - Resume upload to Supabase Storage
+   - Navigation to dashboard on completion
+
+3. **Dashboard (Basic)**
+   - Welcome message with user name
+   - Quick action cards (Discover, Research, Build, Outreach)
+   - Navigation to main features
+   - Simple layout with placeholders for future stats
+
+4. **Company Discovery (Mock Data)**
+   - Display 10-15 pre-defined company cards
+   - Basic filtering by tech stack
+   - Save company functionality
+   - Navigate to company profile
+
+5. **Company Profile & Research (Mock Data)**
+   - Display static company information
+   - Mock research data structure
+   - Navigation to project idea generation
+   - Save research for later reference
+
+6. **Project Idea Generation (Mock Data)**
+   - Display 3-5 pre-written project ideas
+   - Allow selection of one project
+   - Navigate to add project page
+   - Basic project details form
+
+7. **Portfolio Page (Basic)**
+   - Display list of projects
+   - Show project status badges
+   - Link to GitHub and live URLs
+   - Basic filtering by status
+
+8. **Email Generation (Mock)**
+   - Template-based email generation
+   - Copy to clipboard functionality
+   - Display company and project context
+   - Regenerate option
+
+**Technical Implementation:**
+- Set up Supabase project with database and storage
+- Configure Clerk for authentication and user management
+- Create all database tables with RLS policies
+- Implement Clerk authentication flows in React
+- Build out all page components with mock data
+- Set up React Router and navigation
+- Implement responsive design with Tailwind CSS
+
+**Success Criteria:**
+- User can complete full signup → research → project → outreach flow
+- All pages functional with mock data
+- Responsive design works on mobile and desktop
+- Navigation is intuitive and breadcrumbs work
+
+### Phase 2: AI Integration (Real Intelligence)
+
+**Goal:** Replace mock data with real AI-generated content
+
+**Features:**
+1. **AI Company Discovery**
+   - Edge function for company matching
+   - User profile analysis
+   - Real company data enrichment
+   - Personalized recommendations
+
+2. **AI Research Generation**
+   - Edge function for company research
+   - Web scraping for company data
+   - AI synthesis of information
+   - Structured data extraction with tool calling
+
+3. **AI Project Idea Generation**
+   - Edge function for project suggestions
+   - Context-aware idea generation
+   - Alignment with user skills and company needs
+   - Structured output with all project fields
+
+4. **AI Email Generation**
+   - Edge function for personalized emails
+   - Context integration (user, company, project)
+   - Multiple tone/style options
+   - A/B testing capability for email variants
+
+5. **Streaming Support**
+   - Real-time AI response rendering
+   - Token-by-token streaming for research
+   - Loading states with progress indicators
+   - Error handling and retry logic
+
+**Technical Implementation:**
+- Set up Voltagent framework and agent configurations
+- Create Supabase Edge Functions to trigger Voltagent agents
+- Implement streaming responses for real-time agent feedback
+- Add proper error handling, retry logic, and rate limiting
+- Create engaging loading states with agent progress indicators
+- Store agent execution logs and generated content in database
+
+**Success Criteria:**
+- All Voltagent agents generate relevant, high-quality content
+- Streaming agent feedback works smoothly without lag
+- Agent failures and errors handled gracefully with retries
+- Agent execution results cached to improve performance
+- Users can re-trigger agents if unsatisfied with results
+- Agent execution logs provide transparency and debugging
+
+### Phase 3: Enhanced User Experience
+
+**Goal:** Add polish, personalization, and engagement features
+
+**Features:**
+1. **Advanced Dashboard**
+   - Recent activity feed
+   - Progress tracking and statistics
+   - Next recommended actions
+   - Success metrics (emails sent, responses received)
+
+2. **Project Management Enhancements**
+   - Rich text editor for descriptions
+   - Image uploads for project screenshots
+   - Tags and categories
+   - Search and advanced filtering
+   - Export portfolio as PDF
+
+3. **Research Deep Dive**
+   - Expandable sections with more detail
+   - Save and annotate research
+   - Compare multiple companies side-by-side
+   - Export research reports
+
+4. **Email Campaign Tracking**
+   - Track sent emails
+   - Log responses and follow-ups
+   - Email templates library
+   - Success rate analytics
+
+5. **Notifications System**
+   - In-app notifications for milestones
+   - Email reminders for follow-ups
+   - Celebrating wins (project completed, email sent)
+   - Weekly progress summaries
+
+6. **Profile Management**
+   - Edit profile information
+   - Update skills and interests
+   - Portfolio settings (public/private)
+   - Account settings
+
+**Technical Implementation:**
+- Add notification system with toast and email
+- Implement rich text editor (Tiptap or similar)
+- Create analytics dashboard with charts
+- Build comparison features
+- Add export functionality (PDF generation)
+- Enhance forms with better validation
+
+**Success Criteria:**
+- Users feel engaged and motivated
+- Clear sense of progress and achievement
+- Easy to manage multiple opportunities
+- Professional portfolio presentation
+- Actionable analytics and insights
+
+### Phase 4: Collaboration & Social
+
+**Goal:** Enable community learning and sharing
+
+**Features:**
+1. **Public Portfolios**
+   - Public URLs for user portfolios
+   - Customizable portfolio pages
+   - SEO optimization for discoverability
+   - Share on social media
+
+2. **Project Showcase**
+   - Browse projects from other users
+   - Filter by technology, industry, company
+   - Like and bookmark projects
+   - Comment and feedback system
+
+3. **Success Stories**
+   - Submit interview/offer stories
+   - Display community wins
+   - Learn from successful strategies
+   - Testimonial collection
+
+4. **Templates & Resources**
+   - Project idea templates
+   - Email templates library
+   - Best practices guides
+   - Tutorial content
+
+5. **Community Features**
+   - User profiles with bios
+   - Follow other users
+   - Activity feed of community projects
+   - Discussion forums (future)
+
+**Technical Implementation:**
+- Create public portfolio routing
+- Add social features (likes, comments)
+- Build content moderation system
+- Implement sharing functionality
+- Add SEO metadata for public pages
+- Create community dashboard
+
+**Success Criteria:**
+- Users actively share their work
+- Community provides value and inspiration
+- Viral growth through shared portfolios
+- High-quality project examples visible
+- Users learn from each other's success
+
+### Phase 5: Advanced Features & Scale
+
+**Goal:** Support power users and enterprise needs
+
+**Features:**
+1. **Advanced Search & Discovery**
+   - Boolean search operators
+   - Saved search filters
+   - Company alerts for new opportunities
+   - Industry trend tracking
+
+2. **Team & Collaboration**
+   - Share companies and research with team
+   - Collaborate on projects
+   - Team analytics and leaderboards
+   - Mentorship matching
+
+3. **Browser Extension**
+   - Quick-save companies from any site
+   - LinkedIn integration
+   - GitHub repo analysis
+   - One-click research generation
+
+4. **API Access**
+   - Developer API for integrations
+   - Webhook support for automation
+   - Custom workflow triggers
+   - Rate limiting and usage tracking
+
+5. **Premium Features**
+   - Advanced AI models for higher quality
+   - Unlimited research and generation
+   - Priority support
+   - Custom branding for portfolios
+
+6. **Mobile App**
+   - Native iOS and Android apps
+   - Push notifications
+   - Offline access to research
+   - Mobile-optimized workflows
+
+**Technical Implementation:**
+- Build browser extension (Chrome, Firefox)
+- Create API layer with authentication
+- Implement subscription and payment system
+- Develop mobile app (React Native)
+- Add advanced caching and offline support
+- Scale infrastructure for high traffic
+
+**Success Criteria:**
+- Power users efficiently manage 50+ opportunities
+- Teams collaborate effectively
+- API adoption by third-party tools
+- Mobile app has strong ratings
+- Premium tier converts at 10%+ rate
+
+---
+
+## Logical Dependency Chain
+
+### Critical Path (Must Build First)
+
+1. **Authentication & User Management (Clerk)**
+   - Required for all personalized features
+   - Blocks: All user-specific data and flows
+   - **Build First:** Clerk setup, user profiles, session management, protected routes
+
+2. **Database Schema & RLS**
+   - Foundation for all data storage
+   - Blocks: Any feature that persists data
+   - **Build First:** All tables, relationships, security policies
+
+3. **Onboarding Flow**
+   - Collects data needed for personalization
+   - Blocks: AI matching, project recommendations
+   - **Build First:** Multi-step form, profile storage, navigation
+
+4. **Basic Dashboard**
+   - Entry point after login
+   - Blocks: User retention, navigation to features
+   - **Build First:** Layout, quick actions, basic navigation
+
+### Primary Features (MVP Core)
+
+5. **Company Discovery (Mock → Real)**
+   - Start with static data for rapid iteration
+   - Unblocks: User testing of UX and flows
+   - **Build First:** Mock data display, then AI integration
+
+6. **Company Profile & Research (Mock → Real)**
+   - Static templates validate information architecture
+   - Unblocks: Understanding what research users need
+   - **Build First:** Mock research display, then AI generation
+
+7. **Project Ideas (Mock → Real)**
+   - Pre-written ideas test selection and addition flow
+   - Unblocks: Portfolio building without AI delay
+   - **Build First:** Mock ideas, selection flow, then AI generation
+
+8. **Portfolio Management**
+   - Core value: organizing projects
+   - Unblocks: Demonstrating value to employers
+   - **Build First:** Display projects, status tracking, basic CRUD
+
+9. **Email Generation (Template → AI)**
+   - Template emails unblock outreach immediately
+   - AI enhancement comes after validation
+   - **Build First:** Template system, then AI personalization
+
+### Enhancement Features (Post-MVP)
+
+10. **Advanced Dashboard**
+    - Depends on: Core features generating data
+    - Builds on: Basic dashboard, all primary features
+    - Adds: Analytics, recommendations, activity tracking
+
+11. **Rich Content Editing**
+    - Depends on: Portfolio established
+    - Builds on: Basic project management
+    - Adds: Rich text, images, better presentation
+
+12. **Notification System**
+    - Depends on: User activity patterns established
+    - Builds on: All core features
+    - Adds: Engagement, retention, reminders
+
+### Advanced Features (Future)
+
+13. **Social & Community**
+    - Depends on: Critical mass of quality projects
+    - Builds on: Portfolio management, user profiles
+    - Adds: Discovery, learning, viral growth
+
+14. **Browser Extension**
+    - Depends on: Core platform stability
+    - Builds on: Company discovery, research generation
+    - Adds: Convenience, workflow integration
+
+15. **Mobile App**
+    - Depends on: Product-market fit validated
+    - Builds on: All web features
+    - Adds: Mobile-first workflows, notifications
+
+### Feature Scoping Strategy
+
+**Atomic Features:**
+Each feature should be independently testable and valuable:
+- **Authentication:** Clerk sign up → get session → access dashboard
+- **Onboarding:** Submit form → save data → redirect
+- **Discovery:** View companies → save → navigate
+- **Research:** Request research → display results → save
+- **Ideas:** Generate ideas → select one → add to portfolio
+- **Portfolio:** View projects → filter → edit
+- **Email:** Generate email → copy → send externally
+
+**Incremental Enhancement:**
+Build minimal version, then iterate:
+- **Dashboard V1:** Static cards with navigation
+- **Dashboard V2:** Display saved companies count
+- **Dashboard V3:** Show recent projects
+- **Dashboard V4:** Add activity feed
+- **Dashboard V5:** Include analytics and recommendations
+
+This approach allows:
+- Rapid testing of each feature
+- Early user feedback
+- Flexibility to pivot
+- Continuous value delivery
+- Manageable code changes
+
+---
+
+## Risks and Mitigations
+
+### Technical Challenges
+
+**Risk: AI Generation Quality Inconsistent**
+- **Impact:** Users get irrelevant company matches, poor project ideas, generic emails
+- **Likelihood:** High initially, decreases with prompt refinement
+- **Mitigation:**
+  - Extensive prompt engineering and testing
+  - User feedback loops to identify bad outputs
+  - Regeneration options for all AI features
+  - Manual curation of training examples
+  - A/B testing of different prompts
+  - Fallback to template-based content if AI fails
+
+**Risk: AI Costs Exceed Budget**
+- **Impact:** Unsustainable unit economics, need to limit features
+- **Likelihood:** Medium
+- **Mitigation:**
+  - Implement aggressive caching of AI responses
+  - Rate limiting per user to prevent abuse
+  - Use smaller, cheaper models where appropriate
+  - Batch operations to reduce API calls
+  - Premium tier for heavy users
+  - Monitor token usage and optimize prompts for efficiency
+
+**Risk: Slow AI Response Times**
+- **Impact:** Poor user experience, perceived as broken
+- **Likelihood:** Medium
+- **Mitigation:**
+  - Implement streaming for real-time feedback
+  - Show engaging loading states with progress
+  - Pre-generate content where possible
+  - Use faster models for simple tasks
+  - Async generation with email notification for slow tasks
+  - Set user expectations about generation time
+
+**Risk: Supabase Scale Limitations**
+- **Impact:** Performance degrades as user base grows
+- **Likelihood:** Low initially, increases with growth
+- **Mitigation:**
+  - Optimize database queries and add indexes
+  - Implement connection pooling
+  - Use Supabase Edge Functions for compute
+  - Cache frequently accessed data
+  - Monitor performance metrics proactively
+  - Plan migration path to dedicated infrastructure if needed
+
+### Product & Market Challenges
+
+**Risk: Users Don't Complete Projects**
+- **Impact:** Platform loses core value proposition
+- **Likelihood:** High (behavior change is hard)
+- **Mitigation:**
+  - Start with smaller, achievable project scopes
+  - Provide project templates and starter code
+  - Implement reminders and motivation features
+  - Celebrate small wins (project started, 50% done)
+  - Connect users with accountability partners
+  - Showcase success stories prominently
+
+**Risk: Companies Don't Respond to Outreach**
+- **Impact:** Users become discouraged, churn
+- **Likelihood:** Medium (cold outreach is hard)
+- **Mitigation:**
+  - Educate users on realistic expectations
+  - Provide A/B testing for email approaches
+  - Include follow-up strategies and templates
+  - Track and display success rate metrics
+  - Connect successful users with newbies
+  - Continuously improve email generation based on response data
+
+**Risk: Low User Activation**
+- **Impact:** High signup but low engagement
+- **Likelihood:** Medium
+- **Mitigation:**
+  - Streamline onboarding to 5 minutes max
+  - Provide immediate value (free company matches)
+  - Implement email nurture campaigns
+  - In-app tooltips and guided tours
+  - Quick wins in first session
+  - Monitor activation funnel and optimize aggressively
+
+**Risk: Project Ideas Are Too Generic**
+- **Impact:** Users don't stand out, methodology fails
+- **Likelihood:** Medium
+- **Mitigation:**
+  - Deep company research to find specific pain points
+  - Personalization based on user's unique skills
+  - Allow user customization of generated ideas
+  - Provide examples of good vs bad project ideas
+  - Community voting on best projects
+  - Continuous refinement of idea generation prompts
+
+### Scope & Resource Challenges
+
+**Risk: Feature Creep Delays MVP**
+- **Impact:** Slow time to market, miss opportunity
+- **Likelihood:** High
+- **Mitigation:**
+  - Strict MVP definition with clear must-haves
+  - Use mock data to validate UX before AI integration
+  - Time-box each feature development
+  - Regular priority reviews to cut scope
+  - User testing with incomplete features
+  - "Launch and iterate" mindset
+
+**Risk: Building Wrong Features First**
+- **Impact:** Wasted development time, poor user experience
+- **Likelihood:** Medium
+- **Mitigation:**
+  - User research and interviews before building
+  - Mock-ups and prototypes for validation
+  - Analytics on feature usage from day one
+  - Regular user feedback sessions
+  - Willingness to deprecate unused features
+  - Focus on job-to-be-done, not feature list
+
+**Risk: Single Developer Bottleneck**
+- **Impact:** Slow development, no redundancy
+- **Likelihood:** High if solo founder
+- **Mitigation:**
+  - Use no-code/low-code tools where possible
+  - Leverage pre-built components (shadcn-ui)
+  - Focus on core differentiators, not infrastructure
+  - Build modular, maintainable code for future team
+  - Document decisions and architecture
+  - Consider technical co-founder or contractor
+
+### MVP Scoping Strategy
+
+**Minimum Viable Product Definition:**
+
+The MVP must enable users to:
+1. Sign up and create a profile (5 min)
+2. Discover 3-5 relevant companies (10 min)
+3. Research 1 company deeply (5 min)
+4. Get 3-5 project ideas for that company (2 min)
+5. Add 1 project to their portfolio (3 min)
+6. Generate 1 personalized outreach email (2 min)
+
+**Total time to value: ~30 minutes**
+
+**What's In MVP:**
+- ✅ Authentication (Clerk with email/password and social OAuth)
+- ✅ Onboarding (simplified to 3 steps)
+- ✅ Company discovery (10 companies, basic filters)
+- ✅ Company research (Voltagent Deep Research Agent)
+- ✅ Project idea generation (Voltagent Project Generator Agent)
+- ✅ Portfolio (list view, basic CRUD)
+- ✅ Email generation (Voltagent Email Outreach Agent)
+- ✅ Dashboard (navigation hub only)
+
+**What's Out of MVP:**
+- ❌ OAuth providers
+- ❌ Advanced search and filtering
+- ❌ Rich text editing
+- ❌ Image uploads
+- ❌ Public portfolios
+- ❌ Social features
+- ❌ Analytics and tracking
+- ❌ Notification system
+- ❌ Mobile app
+- ❌ Browser extension
+- ❌ Team features
+- ❌ Premium tier
+
+**Success Metrics for MVP:**
+- 100 signups in first month
+- 40% complete onboarding
+- 20% complete one full cycle (onboarding → email sent)
+- 10% report positive response to outreach
+- User session time > 15 minutes
+- NPS > 30
+
+**MVP Validation Goals:**
+1. Confirm users will complete onboarding
+2. Verify AI-generated research is useful
+3. Validate project ideas are actionable
+4. Test if emails get responses
+5. Understand which features users want next
+6. Identify major usability issues
+
+---
+
+## Appendix
+
+### Research Findings
+
+**Job Search Statistics:**
+- Average developer role receives 500+ applications
+- Cold email response rate: 1-3%
+- Response rate with personalized demo: 15-25% (estimated)
+- Time to hire: 4-8 weeks for experienced developers
+- 70% of jobs filled through networking, not applications
+
+**Developer Pain Points:**
+- "My resume never gets past ATS systems"
+- "I can't stand out among hundreds of applicants"
+- "I have the skills but can't prove them"
+- "I don't know how to network effectively"
+- "Building projects in isolation doesn't help job search"
+
+**Competitive Landscape:**
+- Traditional job boards (Indeed, LinkedIn): High volume, low signal
+- Portfolio platforms (GitHub, personal sites): Passive, not targeted
+- Networking platforms (LinkedIn): Requires existing connections
+- Project-based learning (freeCodeCamp): Not connected to job search
+- **Gap:** No tool connects research → projects → outreach in one flow
+
+### Technical Specifications
+
+**Performance Targets:**
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 3.5s
+- Lighthouse Score: > 90
+- API Response Time (non-AI): < 200ms
+- AI Generation Time: < 30s (with streaming feedback)
+
+**Browser Support:**
+- Chrome/Edge: Last 2 versions
+- Firefox: Last 2 versions
+- Safari: Last 2 versions
+- Mobile Safari: iOS 14+
+- Mobile Chrome: Android 10+
+
+**Accessibility Standards:**
+- WCAG 2.1 Level AA compliance
+- Keyboard navigation for all features
+- Screen reader compatibility
+- Color contrast ratios > 4.5:1
+- Focus indicators on all interactive elements
+
+**Security Requirements:**
+- HTTPS only with security headers
+- Clerk JWT token management (automatic expiration and refresh)
+- Clerk password requirements and security policies
+- Rate limiting: 100 requests/hour for Voltagent agent endpoints
+- SQL injection prevention via parameterized queries and Supabase RLS
+- XSS protection via input sanitization
+- CSRF protection via Clerk session validation
+- Webhook signature verification for Clerk events
+
+**Data Retention:**
+- User profiles: Indefinite (until account deletion)
+- Generated research: 90 days
+- Project ideas: Until user deletes
+- Outreach emails: 1 year
+- Session logs: 30 days
+- Error logs: 90 days
+
+### Glossary
+
+- **Spearfishing Method:** Strategic job search approach targeting specific companies with personalized projects
+- **Pain Point:** Specific problem or challenge a company faces
+- **Opportunity Signal:** Indicator that a company may be receptive to outreach (funding, hiring, growth)
+- **RLS:** Row Level Security - database security model isolating user data
+- **Edge Function:** Serverless function running close to users for low latency
+- **SSE:** Server-Sent Events - protocol for server-to-client streaming
+- **LLM:** Large Language Model - AI system for text generation
+- **Tool Calling:** AI technique for structured data extraction
+- **MVP:** Minimum Viable Product - smallest feature set to validate product
+
+### Additional Resources
+
+**Design Assets:**
+- Figma design files (to be created)
+- Brand guidelines and style guide
+- Component library documentation
+- Icon set and illustration library
+
+**Development Resources:**
+- API documentation
+- Database schema diagrams
+- Architecture decision records
+- Code style guide
+- Git workflow and branching strategy
+
+**User Research:**
+- Interview transcripts
+- Survey results
+- User testing videos
+- Competitive analysis
+- Market sizing calculations

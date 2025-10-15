@@ -1,0 +1,143 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Set up Authentication with Clerk",
+        "description": "Implement user authentication system using Clerk with email/password, social OAuth, and magic link authentication options. Integrate with existing React frontend components.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Create a Clerk application in the Clerk dashboard\n2. Install Clerk SDK: `npm install @clerk/clerk-react`\n3. Configure Clerk provider in the main application component\n4. Create protected routes using Clerk's `<SignedIn>` and `<SignedOut>` components\n5. Integrate Clerk authentication with existing Auth UI component\n6. Connect authentication with Dashboard and Onboarding components\n7. Set up webhook endpoint for Clerk events\n8. Configure user session management with JWT tokens\n9. Sync user data between Clerk and Supabase\n10. Implement Row Level Security policies for user data in Supabase",
+        "testStrategy": "1. Unit tests for Clerk provider integration\n2. Integration tests for protected routes\n3. End-to-end tests for authentication flows with existing Auth UI\n4. Test authentication state persistence across Dashboard and Onboarding components\n5. Manual testing of social OAuth providers\n6. Verify webhook functionality with test events\n7. Test session persistence and token refresh\n8. Validate user data synchronization between Clerk and Supabase\n9. Validate security policies with different user accounts",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Create Database Schema and Supabase Setup",
+        "description": "Set up Supabase project and implement the complete database schema with proper relationships and Row Level Security policies.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Create new Supabase project\n2. Define all database tables according to the PRD data models:\n   - users\n   - companies\n   - user_saved_companies\n   - company_research\n   - project_ideas\n   - projects\n   - outreach_emails\n   - voltagent_executions\n   - clerk_webhook_events\n3. Set up foreign key relationships between tables\n4. Create indexes for frequently queried columns\n5. Implement Row Level Security policies for all tables\n6. Configure Supabase Storage buckets for resume uploads and project assets\n7. Set up database triggers for automated workflows\n8. Create Supabase Edge Functions for API endpoints\n9. Configure Supabase Realtime for subscription features\n10. Document schema with ERD diagram",
+        "testStrategy": "1. Verify table creation and relationships with test queries\n2. Test RLS policies with different user contexts\n3. Validate foreign key constraints with sample data\n4. Benchmark query performance with indexes\n5. Test storage bucket access controls\n6. Verify database triggers with test events\n7. Load test with sample data to ensure scalability",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Integrate Voltagent AI Framework",
+        "description": "Set up the Voltagent AI framework to orchestrate all three AI agents that power the research, project idea generation, and email outreach features with real intelligence.",
+        "status": "pending",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "details": "1. Set up Voltagent framework and agent configurations\n2. Create Supabase Edge Functions for agent triggers:\n   - /voltagent/research\n   - /voltagent/project-generator\n   - /voltagent/email-outreach\n3. Implement streaming responses for real-time agent feedback\n4. Add proper error handling, retry logic, and rate limiting\n5. Create engaging loading states with agent progress indicators\n6. Store agent execution logs in voltagent_executions table\n7. Implement caching for agent responses to improve performance\n8. Add regeneration triggers for unsatisfactory results\n9. Create agent context management for personalized outputs\n10. Implement token usage tracking and optimization\n11. Configure Voltagent to orchestrate all three AI agents (research, project idea generation, and email outreach)",
+        "testStrategy": "1. Test each agent endpoint with sample inputs\n2. Verify streaming response functionality\n3. Test error handling and retry mechanisms\n4. Validate rate limiting functionality\n5. Test caching with repeated requests\n6. Verify agent execution logging\n7. Performance testing for response times\n8. Test regeneration functionality\n9. Validate agent orchestration across all three features",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement User Onboarding Flow",
+        "description": "Connect the existing multi-step onboarding form to Clerk for user creation and Supabase for profile data storage.",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2
+        ],
+        "priority": "high",
+        "details": "1. Integrate the existing onboarding UI component with backend services\n2. Connect user authentication to Clerk API for user creation and management\n3. Implement API endpoints to handle form data submission\n4. Configure Supabase storage for resume file uploads\n5. Store user profile data in the users table with the following sections:\n   - Personal information (name, job title)\n   - Skills and expertise (with tag selection)\n   - Career interests and goals\n   - Target roles\n   - Resume file references\n6. Implement error handling for API failures\n7. Create success/failure notifications for form submission\n8. Set up user session after successful onboarding\n9. Redirect to dashboard upon completion\n10. Document API integration points for future reference",
+        "testStrategy": "1. Unit tests for API integration functions\n2. Integration tests for form submission to Clerk and Supabase\n3. Test resume upload functionality with various file types and sizes\n4. Verify data persistence in Supabase database\n5. Test error handling scenarios (network failures, validation errors)\n6. Test authentication flow after onboarding completion\n7. End-to-end testing of the complete onboarding process",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Build Basic Dashboard and Navigation",
+        "description": "Connect the Dashboard component to real data from Supabase, replacing mock data with actual user stats, saved companies, and recent activity.",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "details": "1. Connect to Supabase client to fetch real user data\n2. Replace mock stats with actual user activity metrics from database\n3. Implement data fetching for recommended startups from user_saved_companies table\n4. Connect recent activity feed to relevant database tables (research, projects, outreach)\n5. Implement real-time data updates using Supabase subscriptions\n6. Add error handling for database connection issues\n7. Optimize queries for dashboard performance\n8. Implement caching strategy for frequently accessed dashboard data\n9. Create loading states with motivational messages during data fetching\n10. Maintain responsive design across all data-populated components",
+        "testStrategy": "1. Verify dashboard renders correctly with real user data from Supabase\n2. Test data fetching for all dashboard components\n3. Validate error handling when database connection fails\n4. Test real-time updates when underlying data changes\n5. Benchmark dashboard loading performance\n6. Verify data accuracy between database and displayed information\n7. Test responsive design with real data across device sizes\n8. Ensure accessibility compliance with screen readers",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Company Discovery Feature",
+        "description": "Connect the existing company discovery UI to real data from Supabase, replacing mock company data with actual database queries and implementing the filtering/search functionality.",
+        "status": "pending",
+        "dependencies": [
+          2
+        ],
+        "priority": "medium",
+        "details": "1. Connect the existing company card component to Supabase data source\n2. Implement database queries for company listing page with grid/list view\n3. Connect filter options (industry, size, tech stack) to Supabase queries\n4. Implement backend search functionality against the companies table\n5. Connect save/bookmark companies feature to user_saved_companies table\n6. Ensure proper database operations for saving and retrieving bookmarked companies\n7. Implement server-side pagination for company results\n8. Connect company detail view with data from Supabase\n9. Replace all mock data with real database queries\n10. Optimize query performance with proper indexing",
+        "testStrategy": "1. Test company listing with various filter combinations against real database\n2. Verify search functionality with different queries against actual company data\n3. Test save/bookmark feature with database persistence in user_saved_companies table\n4. Validate server-side pagination with large result sets\n5. Test navigation to company detail view with real company data\n6. Verify responsive design maintains integrity with real data\n7. Performance testing with production-sized company datasets\n8. Test error handling for database connection issues",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Develop Company Research Feature",
+        "description": "Implement the deep company research feature powered by Voltagent AI that provides comprehensive intelligence on business model, technical landscape, key personnel, and pain points.",
+        "status": "pending",
+        "dependencies": [
+          2,
+          3
+        ],
+        "priority": "medium",
+        "details": "1. Create research request UI with company context\n2. Design research results page with expandable sections\n3. Implement sections for Business Intelligence, Technical Landscape, Key People, Opportunity Signals\n4. Add pain points summary with severity ratings\n5. Create research storage in company_research table\n6. Implement export functionality for research reports\n7. Add loading states for research generation\n8. Create initial version with mock data templates\n9. Integrate with Voltagent AI framework for deep research capabilities\n10. Connect to /voltagent/research endpoint for real-time intelligence\n11. Implement streaming responses for progressive research display\n12. Add save and reference functionality for later use\n13. Create engaging loading states with agent progress indicators",
+        "testStrategy": "1. Test research request flow with sample companies\n2. Verify research results display correctly\n3. Test expandable sections functionality\n4. Validate export feature for different formats\n5. Test loading states and animations\n6. Verify data persistence in database\n7. Test responsive design on different devices\n8. Verify Voltagent integration with real research generation\n9. Test streaming response functionality\n10. Validate error handling and retry mechanisms",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Create Project Idea Generation Feature",
+        "description": "Implement the AI-powered project idea generation feature that suggests targeted projects based on company research and user skills using Voltagent to power the existing ProjectIdeas page.",
+        "status": "pending",
+        "dependencies": [
+          2,
+          3
+        ],
+        "priority": "medium",
+        "details": "1. Create project idea request UI with company context\n2. Design project idea cards with title, description, impact level\n3. Include problem solved, technologies, time estimate, expected impact\n4. Implement idea selection and saving to project_ideas table\n5. Add regeneration option for alternative ideas\n6. Create one-click selection to add project to portfolio\n7. Implement initial version with pre-written templates\n8. Integrate Voltagent for AI-powered project idea generation\n9. Add loading states for idea generation with agent progress indicators\n10. Create transition to project portfolio after selection\n11. Store agent execution logs in voltagent_executions table",
+        "testStrategy": "1. Test idea generation request flow\n2. Verify idea cards display correctly\n3. Test selection and saving functionality\n4. Validate regeneration feature\n5. Test one-click portfolio addition\n6. Verify data persistence in database\n7. Test responsive design on different devices\n8. Verify Voltagent integration and response handling\n9. Test agent execution logging\n10. Validate streaming response functionality",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Build Project Portfolio Management",
+        "description": "Connect the existing Portfolio page to Supabase database, replacing mock portfolio data with real data storage and retrieval.",
+        "status": "pending",
+        "dependencies": [
+          2,
+          8
+        ],
+        "priority": "medium",
+        "details": "1. Connect the existing portfolio UI to Supabase database\n2. Create database schema for projects table with fields for status badges (In Progress, Completed, Pitched)\n3. Implement API endpoints for CRUD operations on portfolio projects\n4. Update filter and sort functionality to work with database queries\n5. Enhance project addition form to save to Supabase\n6. Connect project detail view with database for editable fields\n7. Implement GitHub repo and deployment URL linking with data validation\n8. Update status change functionality to persist in database\n9. Implement project deletion and archiving with soft delete pattern\n10. Add data layer for analytics on project views",
+        "testStrategy": "1. Test database connection and schema validation\n2. Verify CRUD operations for portfolio projects\n3. Test filter and sort functionality with database queries\n4. Validate project addition form saves correctly to Supabase\n5. Test project editing and updates persist in database\n6. Verify GitHub linking functionality with validation\n7. Test responsive design across devices\n8. Verify error handling for database operations",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Email Generation Feature",
+        "description": "Create the personalized email generation feature using Voltagent AI to craft outreach emails based on user profile, company research, and project details.",
+        "status": "pending",
+        "dependencies": [
+          2,
+          9,
+          3
+        ],
+        "priority": "medium",
+        "details": "1. Design email generation request UI with company and project context\n2. Create email template display with personalized sections\n3. Implement copy-to-clipboard functionality\n4. Add regeneration option for tone/approach variations\n5. Store generated emails in outreach_emails table\n6. Create email history view for tracking\n7. Integrate Voltagent AI for email content generation\n8. Implement API endpoints for Voltagent communication\n9. Add loading states for email generation\n10. Create response tracking for sent emails\n11. Implement error handling for AI generation failures\n12. Add feedback mechanism for generated emails",
+        "testStrategy": "1. Test email generation request flow with Voltagent integration\n2. Verify email template rendering with AI-generated content\n3. Test copy-to-clipboard functionality\n4. Validate regeneration feature with different tone/approach parameters\n5. Test email history and tracking\n6. Verify data persistence in outreach_emails table\n7. Test responsive design on different devices\n8. Verify error handling when Voltagent service is unavailable\n9. Test performance with various input lengths and complexities",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-10-15T01:47:41.971Z",
+      "updated": "2025-10-15T01:47:41.971Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
