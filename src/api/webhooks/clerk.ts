@@ -2,6 +2,17 @@ import { Webhook } from 'svix'
 import { WebhookEvent } from '@clerk/clerk-sdk-node'
 import { getSupabaseClient } from '@/lib/supabaseClient'
 
+// Minimal Clerk user payload shapes for webhook events
+interface ClerkUserPayload {
+  id: string
+  first_name?: string | null
+  last_name?: string | null
+}
+
+interface ClerkSessionPayload {
+  user_id?: string
+}
+
 // This would typically be an Express/Fastify/Next.js API route
 // Adjust based on your backend framework
 
@@ -50,20 +61,24 @@ export async function handleClerkWebhook(
   // Handle different event types
   switch (evt.type) {
     case 'user.created':
-      await handleUserCreated(evt.data)
+      await handleUserCreated(evt.data as ClerkUserPayload)
       break
     case 'user.updated':
-      await handleUserUpdated(evt.data)
+      await handleUserUpdated(evt.data as ClerkUserPayload)
       break
     case 'user.deleted':
-      await handleUserDeleted(evt.data)
+      await handleUserDeleted(evt.data as ClerkUserPayload)
       break
-    case 'session.created':
-      console.log('User session created:', evt.data.user_id)
+    case 'session.created': {
+      const d = evt.data as ClerkSessionPayload
+      console.log('User session created:', d.user_id)
       break
-    case 'session.ended':
-      console.log('User session ended:', evt.data.user_id)
+    }
+    case 'session.ended': {
+      const d = evt.data as ClerkSessionPayload
+      console.log('User session ended:', d.user_id)
       break
+    }
     default:
       console.log(`Unhandled event type: ${evt.type}`)
   }
@@ -71,7 +86,7 @@ export async function handleClerkWebhook(
   return { received: true }
 }
 
-async function handleUserCreated(userData: any) {
+async function handleUserCreated(userData: ClerkUserPayload) {
   const supabase = getSupabaseClient()
   
   // Create user profile in Supabase
@@ -92,7 +107,7 @@ async function handleUserCreated(userData: any) {
   console.log('User profile created:', userData.id)
 }
 
-async function handleUserUpdated(userData: any) {
+async function handleUserUpdated(userData: ClerkUserPayload) {
   const supabase = getSupabaseClient()
   
   // Update user profile in Supabase
@@ -112,7 +127,7 @@ async function handleUserUpdated(userData: any) {
   console.log('User profile updated:', userData.id)
 }
 
-async function handleUserDeleted(userData: any) {
+async function handleUserDeleted(userData: ClerkUserPayload) {
   // User deletion is handled by CASCADE in database
   console.log('User deleted (handled by DB cascade):', userData.id)
 }

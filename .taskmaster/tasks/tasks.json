@@ -161,20 +161,85 @@
         "id": "3",
         "title": "Integrate Voltagent AI Framework",
         "description": "Set up the Voltagent AI framework to orchestrate all three AI agents that power the research, project idea generation, and email outreach features with real intelligence.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           "2"
         ],
         "priority": "high",
         "details": "1. Set up Voltagent framework and agent configurations\n2. Create Supabase Edge Functions for agent triggers:\n   - /voltagent/research\n   - /voltagent/project-generator\n   - /voltagent/email-outreach\n3. Implement streaming responses for real-time agent feedback\n4. Add proper error handling, retry logic, and rate limiting\n5. Create engaging loading states with agent progress indicators\n6. Store agent execution logs in voltagent_executions table\n7. Implement caching for agent responses to improve performance\n8. Add regeneration triggers for unsatisfactory results\n9. Create agent context management for personalized outputs\n10. Implement token usage tracking and optimization\n11. Configure Voltagent to orchestrate all three AI agents (research, project idea generation, and email outreach)",
         "testStrategy": "1. Test each agent endpoint with sample inputs\n2. Verify streaming response functionality\n3. Test error handling and retry mechanisms\n4. Validate rate limiting functionality\n5. Test caching with repeated requests\n6. Verify agent execution logging\n7. Performance testing for response times\n8. Test regeneration functionality\n9. Validate agent orchestration across all three features",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up Voltagent Framework and Configure Three AI Agents",
+            "description": "Install and initialize the Voltagent TypeScript framework, then configure three distinct agents for research, project idea generation, and email outreach.",
+            "dependencies": [],
+            "details": "Install Voltagent via npm, set up environment variables (API keys, tokens), and define agent configurations in TypeScript. Each agent should have unique instructions, model/provider settings, and tool integrations as needed. Ensure agents are registered with the Voltagent instance and ready for orchestration.\n<info added on 2025-10-16T00:05:05.230Z>\n## Implementation Approach for Voltagent Integration\n\n- Implement a lightweight integration pattern using Supabase Edge Functions rather than bundling a full Voltagent server\n- Create TypeScript configurations for three agent profiles:\n  1. Research agent\n  2. Project idea generator\n  3. Email outreach agent\n\n### Technical Implementation Details\n- Use AI SDK providers (Anthropic/OpenAI) directly within Edge Functions\n- Configure provider selection via environment variables\n- Define shared prompt templates and output schemas for each agent type\n- Implement standardized client-server contract:\n  - Endpoints accept JSON payloads\n  - Respond via Server-Sent Events (SSE) with standardized event types:\n    - progress: execution status updates\n    - chunk: incremental response data\n    - error: failure information\n    - done: completion signal\n\n### Database Schema Extensions\n- Add tables for agent operations:\n  - voltagent_executions: log all agent runs with inputs/outputs\n  - voltagent_cache: store responses with 24-hour TTL\n  - rate_limits: implement token bucket algorithm for API quota management\n\n### Next Implementation Steps\n- Scaffold Edge Functions directory structure\n- Create shared utility modules for agent operations\n- Prepare .env example with required provider API keys\n</info added on 2025-10-16T00:05:05.230Z>",
+            "status": "done",
+            "testStrategy": "Unit test agent instantiation and configuration. Validate agent registration and ensure each agent responds to a basic prompt.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T00:11:40.234Z"
+          },
+          {
+            "id": 2,
+            "title": "Implement Supabase Edge Functions Endpoints for Agent Triggers",
+            "description": "Create three Supabase Edge Function endpoints: /voltagent/research, /voltagent/project-generator, and /voltagent/email-outreach, each triggering the corresponding agent.",
+            "dependencies": [
+              1
+            ],
+            "details": "Develop TypeScript handlers for each endpoint. Each handler should validate input, trigger the appropriate Voltagent agent, and support streaming responses via SSE. Integrate shared utilities for input validation and SSE event encoding. Ensure endpoints are independent and follow Supabase deployment conventions.",
+            "status": "done",
+            "testStrategy": "Invoke each endpoint with sample payloads. Verify correct agent execution and SSE event structure. Check input validation and error responses.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T00:21:20.753Z"
+          },
+          {
+            "id": 3,
+            "title": "Add Shared Utilities: SSE Encoder, Rate Limiter, Caching, and Logging",
+            "description": "Develop reusable utilities for SSE event encoding, per-user/endpoint rate limiting, response caching, and execution logging, integrating with Supabase tables.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement a standardized SSE encoder utility for progress, chunk, error, and done events. Build a token bucket rate limiter (30 req/5 min per user/endpoint) with Supabase persistence and 429 Retry-After support. Create a caching layer using voltagent_cache (keyed by user_id+endpoint+input_hash, TTL 24h, regeneration bypass, versioning). Log all executions to voltagent_executions with required metadata. Provide hashing and retry utilities.",
+            "status": "done",
+            "testStrategy": "Unit test each utility. Simulate rate limit breaches, cache hits/misses, and log entries. Manually and automatically verify SSE event emission.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T00:24:40.587Z"
+          },
+          {
+            "id": 4,
+            "title": "Integrate Client Library and UI for Streaming, Regeneration, and Token Usage",
+            "description": "Develop and expose a client integration library (src/lib/voltagentClient.ts) to consume SSE streams, handle retries/idempotency, and update the React UI for streaming states, errors, regeneration, and token usage.",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement typed APIs in the client library for each endpoint, parsing SSE events and managing retries. Update React components to show progress indicators, errors, and allow regeneration. Display token usage and cache status. Ensure seamless integration with the Vite+TypeScript structure.\n<info added on 2025-10-16T00:45:48.655Z>\nUX note: Current implementation of buttons and streaming functionality is operational but intentionally basic. These elements will be refined in a future update to create a smoother user experience, including consolidated trigger actions, clearer progress indicators, and unified regeneration behavior across all agent features (Research, Ideas, and Email generation). UI polish and refinement should be deferred until real agent implementations replace the current mock data structures.\n</info added on 2025-10-16T00:45:48.655Z>",
+            "status": "done",
+            "testStrategy": "Test client library with mock and real endpoints. Verify UI updates for all streaming states, errors, and regeneration. Check token usage display.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T02:45:04.103Z"
+          },
+          {
+            "id": 5,
+            "title": "Comprehensive Testing: Utilities, Endpoints, Caching, Rate Limiting, and RLS",
+            "description": "Design and execute unit, integration, and manual tests for all utilities, endpoints, caching, rate limiting, and Supabase Row Level Security (RLS) policies.",
+            "dependencies": [
+              4
+            ],
+            "details": "Write unit tests for hashing, rate limiter, retry, SSE helpers, and input validation. Perform integration tests for endpoint flows, including streaming, caching, and logging. Manually test RLS enforcement and edge cases. Validate alignment with existing Supabase SQL files and ensure all features work end-to-end.",
+            "status": "deferred",
+            "testStrategy": "Run automated test suites for utilities and endpoints. Perform manual and automated checks for SSE, caching, rate limiting, and RLS. Document test coverage and results.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T00:48:35.005Z"
+          }
+        ],
+        "updatedAt": "2025-10-16T02:46:16.860Z"
       },
       {
         "id": "4",
         "title": "Implement User Onboarding Flow",
         "description": "Connect the existing multi-step onboarding form to Clerk for user creation and Supabase for profile data storage.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           "1",
           "2"
@@ -182,7 +247,75 @@
         "priority": "high",
         "details": "1. Integrate the existing onboarding UI component with backend services\n2. Connect user authentication to Clerk API for user creation and management\n3. Implement API endpoints to handle form data submission\n4. Configure Supabase storage for resume file uploads\n5. Store user profile data in the users table with the following sections:\n   - Personal information (name, job title)\n   - Skills and expertise (with tag selection)\n   - Career interests and goals\n   - Target roles\n   - Resume file references\n6. Implement error handling for API failures\n7. Create success/failure notifications for form submission\n8. Set up user session after successful onboarding\n9. Redirect to dashboard upon completion\n10. Document API integration points for future reference",
         "testStrategy": "1. Unit tests for API integration functions\n2. Integration tests for form submission to Clerk and Supabase\n3. Test resume upload functionality with various file types and sizes\n4. Verify data persistence in Supabase database\n5. Test error handling scenarios (network failures, validation errors)\n6. Test authentication flow after onboarding completion\n7. End-to-end testing of the complete onboarding process",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Onboarding UI with Clerk for User Creation",
+            "description": "Connect the existing multi-step onboarding form to Clerk to handle user creation and authentication.",
+            "dependencies": [],
+            "details": "Use Clerk's React SDK to wrap the onboarding flow, ensuring that user sign-up and authentication are handled via Clerk. Pass the session token to backend endpoints for authenticated requests. Ensure the onboarding UI only proceeds if the user is authenticated.",
+            "status": "done",
+            "testStrategy": "Test user sign-up and sign-in flows using Clerk's pre-built components. Verify that only authenticated users can proceed through onboarding.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T02:49:31.582Z"
+          },
+          {
+            "id": 2,
+            "title": "Implement API Endpoints for Onboarding Data Submission",
+            "description": "Create backend API endpoints to receive and process onboarding form data, including personal info, skills, interests, and resume uploads.",
+            "dependencies": [
+              1
+            ],
+            "details": "Develop RESTful endpoints that accept multipart/form-data for resume uploads and JSON for profile data. Authenticate requests using Clerk session tokens in the Authorization header. Validate incoming data and handle errors gracefully.",
+            "status": "done",
+            "testStrategy": "Write unit and integration tests for API endpoints, including authentication checks, data validation, and error handling.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T02:55:11.732Z"
+          },
+          {
+            "id": 3,
+            "title": "Configure Supabase Storage and Users Table Integration",
+            "description": "Set up Supabase storage for resume files and ensure user profile data is stored in the users table with all required sections.",
+            "dependencies": [
+              2
+            ],
+            "details": "Configure Supabase storage buckets for resume uploads. Store file references in the users table. Map onboarding form fields to corresponding columns: personal info, skills, interests, target roles, and resume reference. Ensure proper foreign key relationships.",
+            "status": "done",
+            "testStrategy": "Test file uploads with various file types and sizes. Verify that user profile data is correctly persisted in Supabase and linked to the authenticated Clerk user.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T03:08:40.249Z"
+          },
+          {
+            "id": 4,
+            "title": "Implement Error Handling and User Notifications",
+            "description": "Add robust error handling for API failures and provide user feedback via success/failure notifications during onboarding.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Catch and handle errors from API calls and Supabase operations. Display clear notifications for success, validation errors, and network failures. Ensure the UI prevents duplicate submissions and guides users to resolve issues.",
+            "status": "done",
+            "testStrategy": "Simulate API failures and invalid data submissions. Verify that appropriate notifications are shown and that the onboarding flow handles errors gracefully.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T03:09:34.117Z"
+          },
+          {
+            "id": 5,
+            "title": "Set Up User Session and Redirect to Dashboard Post-Onboarding",
+            "description": "Establish a user session after successful onboarding and redirect the user to the dashboard. Document API integration points.",
+            "dependencies": [
+              1,
+              3,
+              4
+            ],
+            "details": "Ensure that upon successful onboarding, the Clerk session is active and the user is redirected to the dashboard. Document all API endpoints and integration logic for future reference.",
+            "status": "done",
+            "testStrategy": "Test end-to-end onboarding flow, confirming session persistence and correct redirection. Review documentation for completeness and clarity.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T03:10:03.909Z"
+          }
+        ],
+        "updatedAt": "2025-10-16T03:10:03.909Z"
       },
       {
         "id": "5",
@@ -213,41 +346,14 @@
         "subtasks": []
       },
       {
-        "id": "7",
-        "title": "Develop Company Research Feature",
-        "description": "Implement the deep company research feature powered by Voltagent AI that provides comprehensive intelligence on business model, technical landscape, key personnel, and pain points.",
-        "status": "pending",
-        "dependencies": [
-          "2",
-          "3"
-        ],
-        "priority": "medium",
-        "details": "1. Create research request UI with company context\n2. Design research results page with expandable sections\n3. Implement sections for Business Intelligence, Technical Landscape, Key People, Opportunity Signals\n4. Add pain points summary with severity ratings\n5. Create research storage in company_research table\n6. Implement export functionality for research reports\n7. Add loading states for research generation\n8. Create initial version with mock data templates\n9. Integrate with Voltagent AI framework for deep research capabilities\n10. Connect to /voltagent/research endpoint for real-time intelligence\n11. Implement streaming responses for progressive research display\n12. Add save and reference functionality for later use\n13. Create engaging loading states with agent progress indicators",
-        "testStrategy": "1. Test research request flow with sample companies\n2. Verify research results display correctly\n3. Test expandable sections functionality\n4. Validate export feature for different formats\n5. Test loading states and animations\n6. Verify data persistence in database\n7. Test responsive design on different devices\n8. Verify Voltagent integration with real research generation\n9. Test streaming response functionality\n10. Validate error handling and retry mechanisms",
-        "subtasks": []
-      },
-      {
-        "id": "8",
-        "title": "Create Project Idea Generation Feature",
-        "description": "Implement the AI-powered project idea generation feature that suggests targeted projects based on company research and user skills using Voltagent to power the existing ProjectIdeas page.",
-        "status": "pending",
-        "dependencies": [
-          "2",
-          "3"
-        ],
-        "priority": "medium",
-        "details": "1. Create project idea request UI with company context\n2. Design project idea cards with title, description, impact level\n3. Include problem solved, technologies, time estimate, expected impact\n4. Implement idea selection and saving to project_ideas table\n5. Add regeneration option for alternative ideas\n6. Create one-click selection to add project to portfolio\n7. Implement initial version with pre-written templates\n8. Integrate Voltagent for AI-powered project idea generation\n9. Add loading states for idea generation with agent progress indicators\n10. Create transition to project portfolio after selection\n11. Store agent execution logs in voltagent_executions table",
-        "testStrategy": "1. Test idea generation request flow\n2. Verify idea cards display correctly\n3. Test selection and saving functionality\n4. Validate regeneration feature\n5. Test one-click portfolio addition\n6. Verify data persistence in database\n7. Test responsive design on different devices\n8. Verify Voltagent integration and response handling\n9. Test agent execution logging\n10. Validate streaming response functionality",
-        "subtasks": []
-      },
-      {
-        "id": "9",
+        "id": "10",
         "title": "Build Project Portfolio Management",
         "description": "Connect the existing Portfolio page to Supabase database, replacing mock portfolio data with real data storage and retrieval.",
         "status": "pending",
         "dependencies": [
           "2",
-          "8"
+          "8",
+          "9"
         ],
         "priority": "medium",
         "details": "1. Connect the existing portfolio UI to Supabase database\n2. Create database schema for projects table with fields for status badges (In Progress, Completed, Pitched)\n3. Implement API endpoints for CRUD operations on portfolio projects\n4. Update filter and sort functionality to work with database queries\n5. Enhance project addition form to save to Supabase\n6. Connect project detail view with database for editable fields\n7. Implement GitHub repo and deployment URL linking with data validation\n8. Update status change functionality to persist in database\n9. Implement project deletion and archiving with soft delete pattern\n10. Add data layer for analytics on project views",
@@ -255,14 +361,58 @@
         "subtasks": []
       },
       {
-        "id": "10",
+        "id": "9",
+        "title": "Create Project Idea Generation Feature",
+        "description": "Implement the AI-powered project idea generation feature that suggests targeted projects based on company research and user skills using Voltagent to power the existing ProjectIdeas page.",
+        "status": "pending",
+        "dependencies": [
+          "2",
+          "3",
+          "8"
+        ],
+        "priority": "medium",
+        "details": "1. Create project idea request UI with company context\n2. Design project idea cards with title, description, impact level\n3. Include problem solved, technologies, time estimate, expected impact\n4. Implement idea selection and saving to project_ideas table\n5. Add regeneration option for alternative ideas\n6. Create one-click selection to add project to portfolio\n7. Implement initial version with pre-written templates\n8. Integrate Voltagent for AI-powered project idea generation\n9. Add loading states for idea generation with agent progress indicators\n10. Create transition to project portfolio after selection\n11. Store agent execution logs in voltagent_executions table",
+        "testStrategy": "1. Test idea generation request flow\n2. Verify idea cards display correctly\n3. Test selection and saving functionality\n4. Validate regeneration feature\n5. Test one-click portfolio addition\n6. Verify data persistence in database\n7. Test responsive design on different devices\n8. Verify Voltagent integration and response handling\n9. Test agent execution logging\n10. Validate streaming response functionality",
+        "subtasks": []
+      },
+      {
+        "id": "8",
+        "title": "Develop Company Research Feature",
+        "description": "Implement the deep company research feature powered by Voltagent AI that provides comprehensive intelligence on business model, technical landscape, key personnel, and pain points.",
+        "status": "pending",
+        "dependencies": [
+          "2",
+          "3",
+          "7"
+        ],
+        "priority": "medium",
+        "details": "1. Create research request UI with company context\n2. Design research results page with expandable sections\n3. Implement sections for Business Intelligence, Technical Landscape, Key People, Opportunity Signals\n4. Add pain points summary with severity ratings\n5. Create research storage in company_research table\n6. Implement export functionality for research reports\n7. Add loading states for research generation\n8. Create initial version with mock data templates\n9. Integrate with Voltagent AI framework for deep research capabilities\n10. Connect to /voltagent/research endpoint for real-time intelligence\n11. Implement streaming responses for progressive research display\n12. Add save and reference functionality for later use\n13. Create engaging loading states with agent progress indicators",
+        "testStrategy": "1. Test research request flow with sample companies\n2. Verify research results display correctly\n3. Test expandable sections functionality\n4. Validate export feature for different formats\n5. Test loading states and animations\n6. Verify data persistence in database\n7. Test responsive design on different devices\n8. Verify Voltagent integration with real research generation\n9. Test streaming response functionality\n10. Validate error handling and retry mechanisms",
+        "subtasks": []
+      },
+      {
+        "id": "7",
+        "title": "Scaffold VoltAgent Server with Observability (Pre-Agent Implementation)",
+        "description": "Set up a minimal VoltAgent server package focused on observability, integrating VoltOps monitoring and preparing environment/configuration for future agent migrations.",
+        "details": "1. Create a new Node.js package (e.g., /packages/voltagent-server) using Hono as the HTTP server framework and install @voltagent/core and @voltagent/server-hono (or equivalent adapter).\n2. Implement a minimal VoltAgent server that enables VoltAgentObservability (in-memory by default) and exposes a local WebSocket endpoint for real-time monitoring. Do not migrate any business logic or agent implementations yet—Supabase Edge Functions and UI remain unchanged.\n3. Use the existing MCP server integration in Warp to fetch and document VoltAgent observability docs (observability/overview.md, observability/developer-console.md, agents/overview.md) via MCP tools (list_voltagent_docs, get_voltagent_doc). Summarize expected environment variables, keys, and ports required by VoltOps in README/WARP notes.\n4. Add VOLTAGENT_PUBLIC_KEY and VOLTAGENT_SECRET_KEY to .env.example, with documentation on how to obtain and configure these for VoltOps export. Note that persistence (e.g., LibSQL) is not required now, but mention @voltagent/libsql adapter for future reference.\n5. Add a package.json script \"voltagent:dev\" to start the server locally (default http://localhost:3141). Provide a dev script and clear instructions in README/WARP notes for running the server, opening the VoltOps console (https://console.voltagent.dev), and verifying the connection.\n6. Clearly document that all business logic and agent migrations will be handled in future per-agent tasks (research, project-generator, email-outreach) after stabilization. Include explicit notes to keep Supabase Edge Functions and UI as-is for now.",
+        "testStrategy": "1. Run 'npm run voltagent:dev' and verify the VoltAgent server starts at http://localhost:3141 with observability enabled (check for startup logs and WebSocket endpoint).\n2. Confirm @voltagent/core and @voltagent/server-hono (or equivalent) are installed and imported correctly.\n3. Check that VOLTAGENT_PUBLIC_KEY and VOLTAGENT_SECRET_KEY are present in .env.example and referenced in server code; verify documentation for obtaining/configuring these keys is clear.\n4. Use MCP tools to fetch and display observability documentation; ensure README/WARP notes include summarized steps and expected configuration.\n5. Open https://console.voltagent.dev and verify the local server is visible and real-time monitoring is functional (WebSocket view).\n6. Ensure README/WARP notes specify that Supabase Edge Functions and UI remain unchanged, and that future agent migrations are planned as follow-up tasks.",
+        "status": "pending",
+        "dependencies": [
+          "3"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "11",
         "title": "Implement Email Generation Feature",
         "description": "Create the personalized email generation feature using Voltagent AI to craft outreach emails based on user profile, company research, and project details.",
         "status": "pending",
         "dependencies": [
           "2",
+          "3",
           "9",
-          "3"
+          "10"
         ],
         "priority": "medium",
         "details": "1. Design email generation request UI with company and project context\n2. Create email template display with personalized sections\n3. Implement copy-to-clipboard functionality\n4. Add regeneration option for tone/approach variations\n5. Store generated emails in outreach_emails table\n6. Create email history view for tracking\n7. Integrate Voltagent AI for email content generation\n8. Implement API endpoints for Voltagent communication\n9. Add loading states for email generation\n10. Create response tracking for sent emails\n11. Implement error handling for AI generation failures\n12. Add feedback mechanism for generated emails",
@@ -272,9 +422,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T17:52:11.909Z",
-      "taskCount": 10,
-      "completedCount": 2,
+      "lastModified": "2025-10-16T03:10:03.910Z",
+      "taskCount": 11,
+      "completedCount": 4,
       "tags": [
         "master"
       ]

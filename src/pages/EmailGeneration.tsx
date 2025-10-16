@@ -34,6 +34,7 @@ import {
   Save,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useVoltagentStream } from "@/hooks/useVoltagentStream";
 
 interface EmailVariation {
   id: string;
@@ -49,6 +50,7 @@ const EmailGeneration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedEmail, setSelectedEmail] = useState<string>("technical");
+  const [aiEmail, setAiEmail] = useState<string>("");
   const [markAsSent, setMarkAsSent] = useState(false);
   const [editingEmail, setEditingEmail] = useState<EmailVariation | null>(null);
   const [editedSubject, setEditedSubject] = useState("");
@@ -209,6 +211,21 @@ ${user.name}`,
     return <Sparkles className="w-5 h-5" />;
   };
 
+  // AI streaming (Voltagent)
+  const { start: startEmailGen, loading: isAiLoading, error: aiError, chunks } = useVoltagentStream<{ company?: unknown; project?: unknown; tone?: string }, { emailText?: string }>({
+    endpoint: 'email-outreach',
+    userId: 'demo-user',
+    buildInput: () => ({ company, project, tone: 'friendly, professional' })
+  });
+
+  const handleGenerateAI = async () => {
+    setAiEmail("");
+    await startEmailGen();
+    const combined = chunks.map(c => c.emailText).filter(Boolean).join("\n\n");
+    if (combined) setAiEmail(combined);
+    if (aiError) toast({ title: 'AI error', description: aiError, variant: 'destructive' });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
@@ -312,6 +329,34 @@ ${user.name}`,
             </div>
           </CardContent>
         </Card>
+
+        {/* AI Generated Email */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-black text-foreground uppercase tracking-tight">AI Generated Email</h2>
+            <Button onClick={handleGenerateAI} disabled={isAiLoading}>
+              <Sparkles className={`w-4 h-4 mr-2 ${isAiLoading ? 'animate-spin' : ''}`} />
+              {isAiLoading ? 'Generating...' : 'Generate with AI'}
+            </Button>
+          </div>
+          {aiError && <p className="text-sm text-destructive">{aiError}</p>}
+          {aiEmail && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <CardTitle className="text-lg">Result</CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    navigator.clipboard.writeText(aiEmail);
+                    toast({ title: 'Email copied!', description: 'AI email copied to clipboard.' });
+                  }}>
+                    <Copy className="w-4 h-4 mr-2" /> Copy
+                  </Button>
+                </div>
+                <pre className="text-sm whitespace-pre-wrap font-sans text-muted-foreground">{aiEmail}</pre>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* Email Variations */}
         <div className="space-y-4">

@@ -1,6 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Anon client for public operations (no auth required)
+/**
+ * Get Supabase client for browser use
+ * 
+ * This uses the anon key which:
+ * - Allows public access to your Supabase project
+ * - Can call Edge Functions that use service role internally
+ * - Subject to Row Level Security (RLS) policies
+ * 
+ * For authenticated operations, pass Clerk userId to your Edge Functions
+ * and use service role internally (see supabase/functions/*)
+ */
 export function getSupabaseClient() {
   const url = import.meta.env.VITE_SUPABASE_URL
   const anon = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -8,16 +18,5 @@ export function getSupabaseClient() {
   return createClient(url, anon)
 }
 
-// Service role client for admin operations (server-side only!)
-// WARNING: Never use this in frontend code - only for backend/edge functions
-export function getSupabaseServiceClient() {
-  const url = import.meta.env.VITE_SUPABASE_URL
-  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !serviceRole) throw new Error('Missing Supabase service role key')
-  return createClient(url, serviceRole, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  })
-}
+// NOTE: Service role operations should be done in Edge Functions (supabase/functions/)
+// NOT in browser code. Edge Functions use getSupabase(true) from _shared/db.ts

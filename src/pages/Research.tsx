@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -15,8 +15,11 @@ import {
   AlertCircle,
   ArrowLeft,
   Lightbulb,
-  Save
+  Save,
+  Sparkles
 } from "lucide-react";
+
+import { useVoltagentStream } from "@/hooks/useVoltagentStream";
 
 const loadingMessages = [
   "Analyzing company data...",
@@ -134,6 +137,7 @@ const mockResearchData = {
 export default function Research() {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
+  const [aiText, setAiText] = useState<string>("");
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [researchData, setResearchData] = useState<typeof mockResearchData | null>(null);
 
@@ -143,23 +147,31 @@ export default function Research() {
     avatar: "",
   };
 
+  // AI integration
+  const userId = useMemo(() => "demo-user", []);
+  const { start, loading, error, chunks } = useVoltagentStream<{ query: string }, { text?: string }>({
+    endpoint: 'research',
+    userId,
+    buildInput: () => ({ query: `Deep research for company ${id}` }),
+  });
+
   useEffect(() => {
-    // Simulate loading with rotating messages
-    const messageInterval = setInterval(() => {
+    setAiText(chunks.map((c) => c.text).filter(Boolean).join("\n\n"));
+  }, [chunks]);
+
+  useEffect(() => {
+    // Simulated loading replaced by AI call
+    setIsLoading(true);
+    const interval = setInterval(() => {
       setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length);
-    }, 5000);
-
-    // Simulate research generation (30-60 seconds)
-    const loadingTimeout = setTimeout(() => {
-      setResearchData(mockResearchData);
+    }, 3000);
+    start().then(() => {
+      setResearchData(mockResearchData); // keep sections for now; show aiText separately
       setIsLoading(false);
-      clearInterval(messageInterval);
-    }, 8000); // Using 8 seconds for demo, would be 30-60 in production
-
-    return () => {
-      clearInterval(messageInterval);
-      clearTimeout(loadingTimeout);
-    };
+      clearInterval(interval);
+    });
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getSeverityColor = (severity: string): "destructive" | "secondary" | "outline" => {
@@ -222,7 +234,23 @@ export default function Research() {
               AI-generated analysis to help you identify opportunities
             </p>
           </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => start()} disabled={loading}>
+              <Sparkles className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Generating...' : 'Regenerate with AI'}
+            </Button>
+            {error && <span className="text-sm text-destructive">{error}</span>}
+          </div>
         </div>
+
+        {/* AI Text (streamed) */}
+        {aiText && (
+          <Card className="p-6 space-y-2">
+            <h2 className="text-2xl font-bold">AI Summary</h2>
+            <Separator />
+            <pre className="whitespace-pre-wrap text-sm text-muted-foreground">{aiText}</pre>
+          </Card>
+        )}
 
         {/* Section 1: Business Intelligence */}
         <Card className="p-6 space-y-4">

@@ -90,6 +90,24 @@ export function useUserSync() {
 /**
  * Service class for user data synchronization (for use in non-React contexts)
  */
+export interface ClerkUserData {
+  fullName?: string;
+  jobTitle?: string | null;
+  skills?: string[];
+  careerInterests?: string[];
+  targetRoles?: string[];
+  resumeUrl?: string | null;
+}
+
+export type UserProfileUpdate = Partial<{
+  full_name: string;
+  job_title: string | null;
+  skills: string[];
+  career_interests: string[];
+  target_roles: string[];
+  resume_url: string | null;
+}> & Record<string, unknown>;
+
 export class UserSyncService {
   private getSupabase(token?: string) {
     return createClient(
@@ -108,7 +126,7 @@ export class UserSyncService {
   /**
    * Ensure user exists in Supabase
    */
-  async ensureUserExists(clerkUserId: string, userData?: any, token?: string) {
+  async ensureUserExists(clerkUserId: string, userData?: ClerkUserData, token?: string) {
     const supabase = this.getSupabase(token)
     try {
       // Check if user exists
@@ -152,7 +170,7 @@ export class UserSyncService {
   /**
    * Update user profile data
    */
-  async updateUserProfile(clerkUserId: string, profileData: any, token?: string) {
+  async updateUserProfile(clerkUserId: string, profileData: UserProfileUpdate, token?: string) {
     const supabase = this.getSupabase(token)
     try {
       const { error } = await supabase

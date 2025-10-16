@@ -15,8 +15,8 @@ export function useAuthSession() {
     if (!userId) return null
     
     try {
-      // Get token with custom claims if needed
-      const token = await getToken({ template: 'supabase' })
+      // Get default token - Clerk+Supabase integration handles JWT configuration
+      const token = await getToken()
       return token
     } catch (error) {
       console.error('Error getting JWT token:', error)
@@ -26,8 +26,15 @@ export function useAuthSession() {
 
   /**
    * Initialize Supabase client with Clerk JWT
+   * 
+   * NOTE: This pattern doesn't work with current Clerk+Supabase integration.
+   * Use anon key authentication instead (see src/lib/onboarding.ts for working pattern).
+   * Keeping this for reference but it should not be used.
+   * 
+   * @deprecated Use anon key pattern instead
    */
   const getAuthenticatedSupabase = async () => {
+    console.warn('getAuthenticatedSupabase is deprecated - use anon key pattern instead');
     const token = await getJWT()
     if (!token) {
       throw new Error('No authentication token available')

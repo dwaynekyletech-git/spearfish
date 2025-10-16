@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { useVoltagentStream } from "@/hooks/useVoltagentStream";
 
 interface ProjectIdea {
   id: number;
@@ -84,8 +85,36 @@ const mockProjectIdeas: ProjectIdea[] = [
 export default function ProjectIdeas() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [projects] = useState<ProjectIdea[]>(mockProjectIdeas);
+  const [projects, setProjects] = useState<ProjectIdea[]>(mockProjectIdeas);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const userId = useMemo(() => "demo-user", []);
+  const { start, loading, error, chunks } = useVoltagentStream<{ company?: unknown; skills?: string[]; goal?: string }, { ideasText?: string }>({
+    endpoint: 'project-generator',
+    userId,
+    buildInput: () => ({ company: { id }, skills: [], goal: 'portfolio impact' }),
+  });
+
+  useEffect(() => {
+    const combined = chunks.map(c => c.ideasText).filter(Boolean).join("\n");
+    if (combined) {
+      try {
+const parsed = JSON.parse(combined) as Array<Record<string, unknown>>;
+        const mapped: ProjectIdea[] = parsed.map((p, idx) => ({
+          id: idx + 1,
+          title: p.title ?? `Idea ${idx+1}`,
+          impact: (p.impact ?? 'medium').toLowerCase(),
+          problemSolved: p.problem ?? p.problemSolved ?? '—',
+          description: p.description ?? '—',
+          technologies: p.technologies ?? [],
+          timeEstimate: p.time_estimate ?? p.timeEstimate ?? '1-2 weeks',
+          expectedImpact: p.expectedImpact ?? '—',
+        }));
+        setProjects(mapped);
+      } catch {
+        // fallback: keep current
+      }
+    }
+  }, [chunks]);
 
   const getImpactColor = (impact: string): "destructive" | "default" | "secondary" => {
     switch (impact) {
@@ -98,12 +127,10 @@ export default function ProjectIdeas() {
     }
   };
 
-  const handleRegenerate = () => {
+  const handleRegenerate = async () => {
     setIsRegenerating(true);
-    // Simulate regeneration
-    setTimeout(() => {
-      setIsRegenerating(false);
-    }, 2000);
+    await start();
+    setIsRegenerating(false);
   };
 
   const handleSelectProject = (projectId: number) => {
@@ -144,15 +171,16 @@ export default function ProjectIdeas() {
                 AI-generated projects that solve their specific problems
               </p>
             </div>
-            <Button
+              <Button
               variant="outline"
               onClick={handleRegenerate}
-              disabled={isRegenerating}
+              disabled={isRegenerating || loading}
               className="shrink-0"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRegenerating ? 'animate-spin' : ''}`} />
-              Generate Different Ideas
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRegenerating || loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Generating...' : 'Generate Different Ideas'}
             </Button>
+            {error && <span className="text-sm text-destructive ml-2">{error}</span>}
           </div>
         </div>
 

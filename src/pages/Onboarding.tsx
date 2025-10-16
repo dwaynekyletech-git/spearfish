@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { X, Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { submitOnboarding } from "@/lib/onboarding";
+import { toast } from "@/components/ui/use-toast";
 
 const TOTAL_STEPS = 5;
 
@@ -30,11 +33,23 @@ const roleSuggestions = [
 export default function Onboarding() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Clerk session info
+  const { isSignedIn, userId, getToken } = useAuth();
+  const { user } = useUser();
   
   // Step 1 - Basic Info
   const [name, setName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [yearsExperience, setYearsExperience] = useState("");
+
+  // Prefill name from Clerk if available
+  useEffect(() => {
+    if (user) {
+      const fullName = user.fullName || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+      if (fullName && !name) setName(fullName);
+    }
+  }, [user, name]);
   
   // Step 2 - Skills
   const [skills, setSkills] = useState<string[]>([]);
@@ -51,15 +66,34 @@ export default function Onboarding() {
   
   // Step 5 - Resume
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const progress = (currentStep / TOTAL_STEPS) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete onboarding
-      navigate("/dashboard");
+      // Complete onboarding: submit to API then go to dashboard
+      setIsSubmitting(true);
+      try {
+        if (!userId) throw new Error("Not signed in");
+        
+        await submitOnboarding(userId, {
+          full_name: name,
+          job_title: jobTitle,
+          skills,
+          career_interests: interests,
+          target_roles: targetRoles,
+          resume_file: resumeFile,
+        });
+        toast({ title: "Onboarding complete", description: "Your profile has been saved." });
+        navigate("/dashboard");
+      } catch (e: unknown) {
+        toast({ title: "Failed to save onboarding", description: String((e as Error)?.message || e), variant: "destructive" });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -135,17 +169,31 @@ export default function Onboarding() {
   // Resume handlers
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === "application/pdf") {
-      setResumeFile(file);
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid file type", description: "Please upload a PDF resume.", variant: "destructive" });
+      return;
     }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Resume must be under 10MB.", variant: "destructive" });
+      return;
+    }
+    setResumeFile(file);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file && file.type === "application/pdf") {
-      setResumeFile(file);
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid file type", description: "Please upload a PDF resume.", variant: "destructive" });
+      return;
     }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Resume must be under 10MB.", variant: "destructive" });
+      return;
+    }
+    setResumeFile(file);
   };
 
   return (
@@ -166,6 +214,12 @@ export default function Onboarding() {
 
         {/* Step Content */}
         <div className="bg-card rounded-lg border border-border p-8 shadow-lg">
+          {/* Signed-in summary */}
+          {isSignedIn && user && (
+            <div className="mb-6 text-sm text-muted-foreground">
+              Signed in as <span className="font-medium text-foreground">{user.primaryEmailAddress?.emailAddress ?? "user"}</span>
+            </div>
+          )}
           {/* Step 1 - Basic Info */}
           {currentStep === 1 && (
             <div className="space-y-6">
@@ -422,8 +476,8 @@ export default function Onboarding() {
               Skip
             </Button>
 
-            <Button onClick={handleNext}>
-              {currentStep === TOTAL_STEPS ? "Complete" : "Next"}
+            <Button onClick={handleNext} disabled={isSubmitting}>
+              {currentStep === TOTAL_STEPS ? (isSubmitting ? "Saving..." : "Complete") : "Next"}
               {currentStep < TOTAL_STEPS && <ChevronRight className="h-4 w-4 ml-1" />}
             </Button>
           </div>
