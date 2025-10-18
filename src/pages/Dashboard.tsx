@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,64 +14,41 @@ import {
   TrendingUp,
   Clock,
   Zap,
+  Loader2,
 } from "lucide-react";
+import { useDashboardStats, useSavedCompanies, useRecentActivity, useDashboardRealtime } from "@/hooks/useDashboardData";
 
 const Dashboard = () => {
-  // Mock data - would come from backend in real app
+  const { user: clerkUser } = useUser();
+  
+  // Fetch real data from Supabase
+  const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats();
+  const { data: savedCompanies, isLoading: companiesLoading } = useSavedCompanies(4);
+  const { data: recentActivity, isLoading: activityLoading } = useRecentActivity(4);
+  
+  // Enable real-time updates for dashboard data
+  useDashboardRealtime();
+
   const user = {
-    name: "Alex Chen",
-    email: "alex@example.com",
-    avatar: "",
+    name: clerkUser?.fullName || clerkUser?.firstName || "User",
+    email: clerkUser?.primaryEmailAddress?.emailAddress || "",
+    avatar: clerkUser?.imageUrl || "",
   };
 
   const stats = [
-    { label: "Companies Researched", value: 24, icon: Building2, color: "primary" },
-    { label: "Projects Built", value: 7, icon: FolderKanban, color: "accent" },
-    { label: "Emails Sent", value: 15, icon: Mail, color: "warning" },
-    { label: "Interviews Secured", value: 3, icon: Briefcase, color: "primary" },
+    { label: "Companies Researched", value: dashboardStats?.companiesResearched || 0, icon: Building2, color: "primary" },
+    { label: "Projects Built", value: dashboardStats?.projectsBuilt || 0, icon: FolderKanban, color: "accent" },
+    { label: "Emails Sent", value: dashboardStats?.emailsSent || 0, icon: Mail, color: "warning" },
+    { label: "Interviews Secured", value: dashboardStats?.interviewsSecured || 0, icon: Briefcase, color: "primary" },
   ];
 
-  const recommendedStartups = [
-    {
-      id: 1,
-      logo: "",
-      name: "PathAI",
-      tagline: "AI-powered medical diagnostics",
-      score: 94,
-      matchReason: "Strong ML focus",
-    },
-    {
-      id: 2,
-      logo: "",
-      name: "Vanta",
-      tagline: "Security compliance automation",
-      score: 89,
-      matchReason: "DevOps expertise needed",
-    },
-    {
-      id: 3,
-      logo: "",
-      name: "Ramp",
-      tagline: "Corporate card and expense management",
-      score: 87,
-      matchReason: "Backend scale challenges",
-    },
-    {
-      id: 4,
-      logo: "",
-      name: "Notion",
-      tagline: "Connected workspace for teams",
-      score: 85,
-      matchReason: "React expertise valued",
-    },
-  ];
-
-  const recentActivity = [
-    { action: "Researched PathAI", time: "2 hours ago", icon: Search },
-    { action: "Added project: Medical Image Classifier", time: "5 hours ago", icon: Plus },
-    { action: "Sent outreach to Vanta CTO", time: "1 day ago", icon: Mail },
-    { action: "Completed Ramp technical research", time: "2 days ago", icon: Building2 },
-  ];
+  // Map icon strings to components
+  const iconMap = {
+    search: Search,
+    plus: Plus,
+    mail: Mail,
+    building: Building2,
+  };
 
   const quickActions = [
     {
@@ -116,7 +94,14 @@ const Dashboard = () => {
                     <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                       {stat.label}
                     </p>
-                    <p className="text-5xl font-black text-foreground mt-2">{stat.value}</p>
+                    {statsLoading ? (
+                      <div className="flex items-center gap-2 mt-2">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Loading...</span>
+                      </div>
+                    ) : (
+                      <p className="text-5xl font-black text-foreground mt-2">{stat.value}</p>
+                    )}
                   </div>
                   <div
                     className={`w-16 h-16 flex items-center justify-center ${
@@ -143,50 +128,73 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Recommended Startups */}
+        {/* Saved Companies */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-black text-foreground uppercase tracking-tight">
-                Recommended Startups
+                Saved Companies
               </h2>
-              <p className="text-muted-foreground mt-1">Perfect matches based on your profile</p>
+              <p className="text-muted-foreground mt-1">Your bookmarked startups</p>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/discover">View All</Link>
+              <Link to="/discover">Discover More</Link>
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recommendedStartups.map((startup) => (
-              <Link key={startup.id} to={`/company/${startup.id}`}>
-                <Card className="hover:border-primary transition-all h-full">
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <Building2 className="w-6 h-6 text-primary-foreground" />
+          {companiesLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : savedCompanies && savedCompanies.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {savedCompanies.map((company) => (
+                <Link key={company.id} to={`/company/${company.id}`}>
+                  <Card className="hover:border-primary transition-all h-full">
+                    <CardHeader>
+                      <div className="flex items-center justify-between mb-4">
+                        {company.small_logo_thumb_url ? (
+                          <img 
+                            src={company.small_logo_thumb_url} 
+                            alt={company.name} 
+                            className="w-12 h-12 object-contain"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                            <Building2 className="w-6 h-6 text-primary-foreground" />
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="w-4 h-4 text-primary" />
-                        <span className="text-xl font-black text-primary">{startup.score}</span>
-                      </div>
-                    </div>
-                    <CardTitle className="text-xl">{startup.name}</CardTitle>
-                    <CardDescription className="text-sm">{startup.tagline}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="text-xs text-muted-foreground bg-muted px-3 py-2">
-                      {startup.matchReason}
-                    </div>
-                    <Button className="w-full" variant="glow" size="sm">
-                      <Zap className="w-4 h-4 mr-2" />
-                      Spearfish
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+                      <CardTitle className="text-xl">{company.name}</CardTitle>
+                      <CardDescription className="text-sm line-clamp-2">
+                        {company.one_liner || "No description available"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button className="w-full" variant="glow" size="sm">
+                        <Zap className="w-4 h-4 mr-2" />
+                        View Details
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Building2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-semibold text-foreground mb-2">No saved companies yet</p>
+                <p className="text-muted-foreground mb-4">Start discovering companies that match your skills</p>
+                <Button asChild>
+                  <Link to="/discover">
+                    <Search className="w-4 h-4 mr-2" />
+                    Discover Companies
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -199,22 +207,35 @@ const Dashboard = () => {
               <CardDescription>Your latest actions</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-primary/10 border-2 border-primary flex items-center justify-center shrink-0">
-                      <activity.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-semibold text-foreground">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {activityLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : recentActivity && recentActivity.length > 0 ? (
+                <div className="space-y-6">
+                  {recentActivity.map((activity) => {
+                    const IconComponent = iconMap[activity.icon];
+                    return (
+                      <div key={activity.id} className="flex items-start gap-4">
+                        <div className="w-10 h-10 bg-primary/10 border-2 border-primary flex items-center justify-center shrink-0">
+                          <IconComponent className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-semibold text-foreground">{activity.action}</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {activity.time}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  <p>No recent activity yet. Start exploring companies!</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
