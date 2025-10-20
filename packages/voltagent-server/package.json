@@ -4,17 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "tsx watch --env-file=.env src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@voltagent/core": "*",
-    "@voltagent/server-hono": "*",
-    "hono": "*"
+    "@ai-sdk/anthropic": "^2.0.34",
+    "@supabase/supabase-js": "^2.0.0",
+    "@voltagent/core": "^1.1.29",
+    "@voltagent/server-hono": "^1.0.19",
+    "@voltagent/supabase": "^1.0.0",
+    "ai": "^5.0.76",
+    "hono": "*",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "*",
+    "dotenv": "^16.4.5",
     "tsx": "*",
     "typescript": "*"
   }

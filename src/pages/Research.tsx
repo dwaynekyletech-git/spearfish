@@ -1,5 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
+import { useQuery } from "@tanstack/react-query";
+import { getSupabaseAuthed } from "@/lib/supabaseClient";
 import { AppHeader } from "@/components/AppHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -16,10 +19,69 @@ import {
   ArrowLeft,
   Lightbulb,
   Save,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from "lucide-react";
 
 import { useVoltagentStream } from "@/hooks/useVoltagentStream";
+
+// Types matching CompanyResearchSchema from VoltAgent
+interface BusinessIntelligence {
+  funding: string;
+  investors: string[];
+  growth_metrics: string;
+  customers: string[];
+  market_position: string;
+}
+
+interface TechnicalPainPoint {
+  title: string;
+  severity: "critical" | "high" | "medium" | "low";
+  description: string;
+}
+
+interface TechnicalLandscape {
+  tech_stack: string[];
+  github_activity: string;
+  pain_points: TechnicalPainPoint[];
+  recent_releases: string[];
+}
+
+interface KeyPerson {
+  name: string;
+  role: string;
+  interests: string[];
+  recent_activity: string;
+}
+
+interface CommunityFeedback {
+  pain_points: string[];
+  product_gaps: string[];
+  missing_features: string[];
+  user_workarounds: string[];
+}
+
+interface OpportunitySignal {
+  signal: string;
+  description: string;
+  urgency: "high" | "medium" | "low";
+}
+
+interface PainPointSummaryItem {
+  problem: string;
+  severity: "critical" | "high" | "medium" | "low";
+  evidence: string;
+  potential_solution: string;
+}
+
+interface CompanyResearch {
+  business_intelligence: BusinessIntelligence;
+  technical_landscape: TechnicalLandscape;
+  key_people: KeyPerson[];
+  community_feedback: CommunityFeedback;
+  opportunity_signals: OpportunitySignal[];
+  pain_points_summary: PainPointSummaryItem[];
+}
 
 const loadingMessages = [
   "Analyzing company data...",
@@ -30,149 +92,69 @@ const loadingMessages = [
   "Generating insights...",
 ];
 
-// Mock data - in production this would come from AI analysis
-const mockResearchData = {
-  businessIntelligence: {
-    funding: "$15M Series A led by Sequoia Capital",
-    investors: ["Sequoia Capital", "Y Combinator", "A16Z"],
-    growth: "300% YoY revenue growth",
-    customers: ["Stripe", "Notion", "Linear"],
-    marketPosition: "Leading AI-powered developer tools platform with 50K+ active users"
-  },
-  technicalLandscape: {
-    techStack: ["React", "TypeScript", "Node.js", "PostgreSQL", "AWS", "Docker"],
-    githubActivity: "High activity - 150+ commits/month across 12 active repos",
-    painPoints: [
-      {
-        title: "Scaling Issues with Real-time Collaboration",
-        severity: "high",
-        description: "Multiple GitHub issues (#234, #189) mention performance degradation with 10+ concurrent users"
-      },
-      {
-        title: "Mobile Responsiveness Gaps",
-        severity: "medium",
-        description: "Community requests for better mobile experience, currently desktop-first"
-      },
-      {
-        title: "API Rate Limiting Challenges",
-        severity: "high",
-        description: "Recent issues show third-party API rate limits causing user friction"
-      }
-    ],
-    recentReleases: [
-      "v2.3.0 - AI-powered code suggestions (2 weeks ago)",
-      "v2.2.5 - Performance improvements (1 month ago)"
-    ]
-  },
-  keyPeople: [
-    {
-      name: "Sarah Chen",
-      role: "CTO & Co-founder",
-      interests: ["ML infrastructure", "Developer experience"],
-      recentActivity: "Speaking at React Conf 2025"
-    },
-    {
-      name: "Marcus Rodriguez",
-      role: "VP of Engineering",
-      interests: ["System architecture", "Team scaling"],
-      recentActivity: "Hiring for 5 senior positions"
-    },
-    {
-      name: "Emily Park",
-      role: "Head of Product",
-      interests: ["User research", "Product-market fit"],
-      recentActivity: "Published article on AI in developer tools"
-    }
-  ],
-  opportunitySignals: [
-    {
-      signal: "Active Hiring",
-      description: "5 open engineering positions posted this month",
-      urgency: "high"
-    },
-    {
-      signal: "Recent Funding",
-      description: "Series A closed 3 months ago - expansion phase",
-      urgency: "high"
-    },
-    {
-      signal: "Technical Challenges",
-      description: "Public GitHub issues show scaling pain points",
-      urgency: "medium"
-    },
-    {
-      signal: "Conference Presence",
-      description: "CTO speaking at major conferences - raising visibility",
-      urgency: "medium"
-    }
-  ],
-  painPointsSummary: [
-    {
-      problem: "Real-time collaboration performance at scale",
-      severity: "critical",
-      evidence: "15+ GitHub issues, 50+ user complaints on Twitter",
-      potential: "Build WebSocket optimization solution or caching layer"
-    },
-    {
-      problem: "API rate limiting causing user friction",
-      severity: "critical",
-      evidence: "Issues #234, #189, user support tickets",
-      potential: "Create intelligent rate limit management system"
-    },
-    {
-      problem: "Mobile experience significantly lags desktop",
-      severity: "high",
-      evidence: "Customer feedback, low mobile engagement metrics",
-      potential: "Design and prototype mobile-first component library"
-    },
-    {
-      problem: "Onboarding complexity for new users",
-      severity: "medium",
-      evidence: "Community forum discussions, support load",
-      potential: "Build interactive tutorial or guided setup experience"
-    }
-  ]
-};
-
 export default function Research() {
   const { id } = useParams();
-  const [isLoading, setIsLoading] = useState(true);
-  const [aiText, setAiText] = useState<string>("");
+  const { user: clerkUser } = useUser();
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [researchData, setResearchData] = useState<typeof mockResearchData | null>(null);
+  const [researchData, setResearchData] = useState<CompanyResearch | null>(null);
 
   const user = {
-    name: "Alex Chen",
-    email: "alex@example.com",
-    avatar: "",
+    name: clerkUser?.fullName || clerkUser?.firstName || "User",
+    email: clerkUser?.primaryEmailAddress?.emailAddress || "",
+    avatar: clerkUser?.imageUrl || "",
   };
 
-  // AI integration
-  const userId = useMemo(() => "demo-user", []);
-  const { start, loading, error, chunks } = useVoltagentStream<{ query: string }, { text?: string }>({
-    endpoint: 'research',
-    userId,
-    buildInput: () => ({ query: `Deep research for company ${id}` }),
+  // Fetch company data
+  const { data: company } = useQuery({
+    queryKey: ["company", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const supabase = await getSupabaseAuthed();
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id,name,website,github,app_answers")
+        .eq("id", id as string)
+        .single();
+      if (error) throw error;
+      return data as { id: string; name: string; website?: string; github?: any; app_answers?: any };
+    },
+    staleTime: 60_000,
   });
 
-  useEffect(() => {
-    setAiText(chunks.map((c) => c.text).filter(Boolean).join("\n\n"));
-  }, [chunks]);
+  // Extract GitHub URL if available
+  const githubUrl = company?.github?.url || company?.app_answers?.github?.url || null;
 
+  // AI integration with real user ID
+  const userId = clerkUser?.id || "";
+  const { start, loading, error, chunks, done } = useVoltagentStream<{ companyId: string; companyName: string; githubUrl?: string }, Partial<CompanyResearch>>({
+    endpoint: 'research',
+    userId,
+    buildInput: () => ({
+      companyId: id || "",
+      companyName: company?.name || "Unknown Company",
+      githubUrl: githubUrl || undefined,
+    }),
+  });
+
+  // Update research data when streaming is done
   useEffect(() => {
-    // Simulated loading replaced by AI call
-    setIsLoading(true);
+    if (done && chunks.length > 0) {
+      // Merge all chunks into final research data
+      const finalData = chunks.reduce((acc, chunk) => {
+        return { ...acc, ...chunk };
+      }, {} as CompanyResearch);
+      setResearchData(finalData);
+    }
+  }, [done, chunks]);
+
+  // Loading message rotation
+  useEffect(() => {
+    if (!loading) return;
     const interval = setInterval(() => {
       setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 3000);
-    start().then(() => {
-      setResearchData(mockResearchData); // keep sections for now; show aiText separately
-      setIsLoading(false);
-      clearInterval(interval);
-    });
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading]);
 
   const getSeverityColor = (severity: string): "destructive" | "secondary" | "outline" => {
     switch (severity) {
@@ -186,7 +168,7 @@ export default function Research() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-8 text-center space-y-6">
@@ -202,8 +184,6 @@ export default function Research() {
       </div>
     );
   }
-
-  if (!researchData) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
@@ -235,209 +215,308 @@ export default function Research() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => start()} disabled={loading}>
+            <Button 
+              variant="outline" 
+              onClick={() => start()} 
+              disabled={loading || !userId || !company}
+            >
               <Sparkles className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Generating...' : 'Regenerate with AI'}
+              {loading ? 'Generating...' : researchData ? 'Regenerate with AI' : 'Generate Research'}
             </Button>
             {error && <span className="text-sm text-destructive">{error}</span>}
           </div>
         </div>
 
-        {/* AI Text (streamed) */}
-        {aiText && (
-          <Card className="p-6 space-y-2">
-            <h2 className="text-2xl font-bold">AI Summary</h2>
-            <Separator />
-            <pre className="whitespace-pre-wrap text-sm text-muted-foreground">{aiText}</pre>
+        {/* Show message if no research data yet */}
+        {!researchData && !loading && (
+          <Card className="p-8 text-center">
+            <Sparkles className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-xl font-bold mb-2">Ready to Generate Research</h2>
+            <p className="text-muted-foreground mb-4">
+              Click "Generate Research" to start AI-powered analysis of this company
+            </p>
           </Card>
         )}
 
         {/* Section 1: Business Intelligence */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Business Intelligence</h2>
-          </div>
-          <Separator />
-          <div className="grid gap-4">
-            <div>
-              <h3 className="font-semibold mb-2">Recent Funding</h3>
-              <p className="text-muted-foreground">{researchData.businessIntelligence.funding}</p>
+        {researchData && (
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">Business Intelligence</h2>
             </div>
-            <div>
-              <h3 className="font-semibold mb-2">Key Investors</h3>
-              <div className="flex flex-wrap gap-2">
-                {researchData.businessIntelligence.investors.map((investor) => (
-                  <Badge key={investor} variant="secondary">{investor}</Badge>
-                ))}
-              </div>
+            <Separator />
+            <div className="grid gap-4">
+              {researchData.business_intelligence?.funding && (
+                <div>
+                  <h3 className="font-semibold mb-2">Recent Funding</h3>
+                  <p className="text-muted-foreground">{researchData.business_intelligence.funding}</p>
+                </div>
+              )}
+              {researchData.business_intelligence?.investors && researchData.business_intelligence.investors.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Key Investors</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {researchData.business_intelligence.investors.map((investor, idx) => (
+                      <Badge key={idx} variant="secondary">{investor}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {researchData.business_intelligence?.growth_metrics && (
+                <div>
+                  <h3 className="font-semibold mb-2">Growth Trajectory</h3>
+                  <p className="text-muted-foreground">{researchData.business_intelligence.growth_metrics}</p>
+                </div>
+              )}
+              {researchData.business_intelligence?.customers && researchData.business_intelligence.customers.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Notable Customers</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {researchData.business_intelligence.customers.map((customer, idx) => (
+                      <Badge key={idx} variant="outline">{customer}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {researchData.business_intelligence?.market_position && (
+                <div>
+                  <h3 className="font-semibold mb-2">Market Position</h3>
+                  <p className="text-muted-foreground">{researchData.business_intelligence.market_position}</p>
+                </div>
+              )}
             </div>
-            <div>
-              <h3 className="font-semibold mb-2">Growth Trajectory</h3>
-              <p className="text-muted-foreground">{researchData.businessIntelligence.growth}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Notable Customers</h3>
-              <div className="flex flex-wrap gap-2">
-                {researchData.businessIntelligence.customers.map((customer) => (
-                  <Badge key={customer} variant="outline">{customer}</Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Market Position</h3>
-              <p className="text-muted-foreground">{researchData.businessIntelligence.marketPosition}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Section 2: Technical Landscape */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Code2 className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Technical Landscape</h2>
-          </div>
-          <Separator />
-          <div className="grid gap-4">
-            <div>
-              <h3 className="font-semibold mb-2">Tech Stack</h3>
-              <div className="flex flex-wrap gap-2">
-                {researchData.technicalLandscape.techStack.map((tech) => (
-                  <Badge key={tech} variant="secondary">{tech}</Badge>
-                ))}
-              </div>
+        {researchData && researchData.technical_landscape && (
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Code2 className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">Technical Landscape</h2>
             </div>
-            <div>
-              <h3 className="font-semibold mb-2">GitHub Activity</h3>
-              <p className="text-muted-foreground">{researchData.technicalLandscape.githubActivity}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2 text-destructive">Technical Pain Points</h3>
-              <div className="space-y-3">
-                {researchData.technicalLandscape.painPoints.map((pain, idx) => (
-                  <div key={idx} className="border border-border rounded-lg p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h4 className="font-semibold">{pain.title}</h4>
-                      <Badge variant={getSeverityColor(pain.severity)}>
-                        {pain.severity}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{pain.description}</p>
+            <Separator />
+            <div className="grid gap-4">
+              {researchData.technical_landscape.tech_stack && researchData.technical_landscape.tech_stack.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Tech Stack</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {researchData.technical_landscape.tech_stack.map((tech, idx) => (
+                      <Badge key={idx} variant="secondary">{tech}</Badge>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+              {researchData.technical_landscape.github_activity && (
+                <div>
+                  <h3 className="font-semibold mb-2">GitHub Activity</h3>
+                  <p className="text-muted-foreground">{researchData.technical_landscape.github_activity}</p>
+                </div>
+              )}
+              {researchData.technical_landscape.pain_points && researchData.technical_landscape.pain_points.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2 text-destructive">Technical Pain Points</h3>
+                  <div className="space-y-3">
+                    {researchData.technical_landscape.pain_points.map((pain, idx) => (
+                      <div key={idx} className="border border-border rounded-lg p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h4 className="font-semibold">{pain.title}</h4>
+                          <Badge variant={getSeverityColor(pain.severity)}>
+                            {pain.severity}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{pain.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {researchData.technical_landscape.recent_releases && researchData.technical_landscape.recent_releases.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Recent Technical Releases</h3>
+                  <ul className="space-y-1">
+                    {researchData.technical_landscape.recent_releases.map((release, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground">• {release}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-            <div>
-              <h3 className="font-semibold mb-2">Recent Technical Releases</h3>
-              <ul className="space-y-1">
-                {researchData.technicalLandscape.recentReleases.map((release, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground">• {release}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Section 3: Key People */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Key People</h2>
-          </div>
-          <Separator />
-          <div className="grid gap-4">
-            {researchData.keyPeople.map((person, idx) => (
-              <div key={idx} className="border border-border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-semibold">{person.name}</h3>
-                    <p className="text-sm text-muted-foreground">{person.role}</p>
+        {researchData && researchData.key_people && researchData.key_people.length > 0 && (
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">Key People</h2>
+            </div>
+            <Separator />
+            <div className="grid gap-4">
+              {researchData.key_people.map((person, idx) => (
+                <div key={idx} className="border border-border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="font-semibold">{person.name}</h3>
+                      <p className="text-sm text-muted-foreground">{person.role}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 mt-3">
+                    {person.interests && person.interests.length > 0 && (
+                      <div>
+                        <span className="text-sm font-medium">Interests: </span>
+                        <span className="text-sm text-muted-foreground">
+                          {person.interests.join(", ")}
+                        </span>
+                      </div>
+                    )}
+                    {person.recent_activity && (
+                      <div>
+                        <span className="text-sm font-medium">Recent Activity: </span>
+                        <span className="text-sm text-muted-foreground">{person.recent_activity}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="space-y-2 mt-3">
-                  <div>
-                    <span className="text-sm font-medium">Interests: </span>
-                    <span className="text-sm text-muted-foreground">
-                      {person.interests.join(", ")}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">Recent Activity: </span>
-                    <span className="text-sm text-muted-foreground">{person.recentActivity}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        )}
 
-        {/* Section 4: Opportunity Signals */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Opportunity Signals</h2>
-          </div>
-          <Separator />
-          <div className="grid gap-3">
-            {researchData.opportunitySignals.map((signal, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg">
-                <AlertCircle className={`h-5 w-5 mt-0.5 ${
-                  signal.urgency === "high" ? "text-destructive" : "text-warning"
-                }`} />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold">{signal.signal}</h3>
-                    <Badge 
-                      variant={signal.urgency === "high" ? "destructive" : "secondary"}
-                      className="text-xs"
-                    >
-                      {signal.urgency} urgency
+        {/* Section 4: Community Feedback */}
+        {researchData && researchData.community_feedback && (
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">Community Feedback</h2>
+            </div>
+            <Separator />
+            <div className="grid gap-4">
+              {researchData.community_feedback.pain_points && researchData.community_feedback.pain_points.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">User Pain Points</h3>
+                  <ul className="space-y-2">
+                    {researchData.community_feedback.pain_points.map((point, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground border-l-2 border-primary pl-3">
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {researchData.community_feedback.product_gaps && researchData.community_feedback.product_gaps.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Product Gaps</h3>
+                  <ul className="space-y-2">
+                    {researchData.community_feedback.product_gaps.map((gap, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground border-l-2 border-accent pl-3">
+                        {gap}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {researchData.community_feedback.missing_features && researchData.community_feedback.missing_features.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Missing Features</h3>
+                  <ul className="space-y-2">
+                    {researchData.community_feedback.missing_features.map((feature, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground border-l-2 border-warning pl-3">
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {researchData.community_feedback.user_workarounds && researchData.community_feedback.user_workarounds.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">User Workarounds</h3>
+                  <ul className="space-y-2">
+                    {researchData.community_feedback.user_workarounds.map((workaround, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground bg-secondary/30 p-3 rounded">
+                        {workaround}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* Section 5: Opportunity Signals */}
+        {researchData && researchData.opportunity_signals && researchData.opportunity_signals.length > 0 && (
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">Opportunity Signals</h2>
+            </div>
+            <Separator />
+            <div className="grid gap-3">
+              {researchData.opportunity_signals.map((signal, idx) => (
+                <div key={idx} className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg">
+                  <AlertCircle className={`h-5 w-5 mt-0.5 ${
+                    signal.urgency === "high" ? "text-destructive" : "text-warning"
+                  }`} />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold">{signal.signal}</h3>
+                      <Badge 
+                        variant={signal.urgency === "high" ? "destructive" : "secondary"}
+                        className="text-xs"
+                      >
+                        {signal.urgency} urgency
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{signal.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Section 6: Pain Points Summary (Most Important) */}
+        {researchData && researchData.pain_points_summary && researchData.pain_points_summary.length > 0 && (
+          <Card className="p-6 space-y-4 border-2 border-primary">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-6 w-6 text-destructive" />
+              <h2 className="text-2xl font-bold">Pain Points Summary</h2>
+              <Badge variant="destructive" className="ml-auto">Priority Section</Badge>
+            </div>
+            <Separator />
+            <p className="text-muted-foreground">
+              These are the most actionable problems you can solve for this company
+            </p>
+            <div className="space-y-4">
+              {researchData.pain_points_summary.map((pain, idx) => (
+                <div key={idx} className="border-2 border-border rounded-lg p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-lg">{pain.problem}</h3>
+                    <Badge variant={getSeverityColor(pain.severity)}>
+                      {pain.severity}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{signal.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Section 5: Pain Points Summary (Most Important) */}
-        <Card className="p-6 space-y-4 border-2 border-primary">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-6 w-6 text-destructive" />
-            <h2 className="text-2xl font-bold">Pain Points Summary</h2>
-            <Badge variant="destructive" className="ml-auto">Priority Section</Badge>
-          </div>
-          <Separator />
-          <p className="text-muted-foreground">
-            These are the most actionable problems you can solve for this company
-          </p>
-          <div className="space-y-4">
-            {researchData.painPointsSummary.map((pain, idx) => (
-              <div key={idx} className="border-2 border-border rounded-lg p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-bold text-lg">{pain.problem}</h3>
-                  <Badge variant={getSeverityColor(pain.severity)}>
-                    {pain.severity}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-sm font-semibold">Evidence: </span>
-                    <span className="text-sm text-muted-foreground">{pain.evidence}</span>
-                  </div>
-                  <div className="bg-accent/50 rounded-md p-3">
-                    <span className="text-sm font-semibold flex items-center gap-2 mb-1">
-                      <Lightbulb className="h-4 w-4 text-accent-foreground" />
-                      Project Opportunity:
-                    </span>
-                    <span className="text-sm">{pain.potential}</span>
+                  <div className="space-y-2">
+                    <div>
+                      <span className="text-sm font-semibold">Evidence: </span>
+                      <span className="text-sm text-muted-foreground">{pain.evidence}</span>
+                    </div>
+                    <div className="bg-accent/50 rounded-md p-3">
+                      <span className="text-sm font-semibold flex items-center gap-2 mb-1">
+                        <Lightbulb className="h-4 w-4 text-accent-foreground" />
+                        Project Opportunity:
+                      </span>
+                      <span className="text-sm">{pain.potential_solution}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Bottom Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8">

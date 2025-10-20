@@ -1,4 +1,4 @@
-// Client library for calling Voltagent endpoints with SSE
+// Client library for calling VoltAgent endpoints with SSE
 export type VoltagentEndpoint = 'research' | 'project-generator' | 'email-outreach';
 
 export interface StreamHandlers<T = unknown> {
@@ -16,21 +16,34 @@ export interface VoltagentRequest<I = unknown> {
 }
 
 export async function streamVoltagent<I = unknown, T = unknown>(req: VoltagentRequest<I>, handlers: StreamHandlers<T>) {
-  const pathMap: Record<VoltagentEndpoint, string> = {
-    research: '/functions/v1/voltagent-research',
-    'project-generator': '/functions/v1/voltagent-project-generator',
-    'email-outreach': '/functions/v1/voltagent-email-outreach',
+  // Get VoltAgent base URL from environment (defaults to localhost for dev)
+  const baseUrl = import.meta.env.VITE_VOLTAGENT_BASE_URL || 'http://localhost:3141';
+  
+  // Map endpoints to custom or VoltAgent paths
+  const agentPathMap: Record<VoltagentEndpoint, string> = {
+    research: '/research/stream',
+    'project-generator': '/agents/project-generator/stream-object',
+    'email-outreach': '/agents/email-outreach/stream-object',
   };
 
-  const url = pathMap[req.endpoint];
+  const url = `${baseUrl}${agentPathMap[req.endpoint]}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(req),
+    body: JSON.stringify({
+      input: req.input,
+      userId: req.userId,
+      ...req.options,
+    }),
   });
 
   if (!res.ok || !res.body) {
-    handlers.onError?.(`HTTP ${res.status}`);
+    try {
+      const errText = await res.text();
+      handlers.onError?.(`HTTP ${res.status}${errText ? ` - ${errText}` : ''}`);
+    } catch {
+      handlers.onError?.(`HTTP ${res.status}`);
+    }
     return;
   }
 

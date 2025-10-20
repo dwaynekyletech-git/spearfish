@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Set up Authentication with Clerk",
         "description": "Implement user authentication system using Clerk with email/password, social OAuth, and magic link authentication options. Integrate with existing React frontend components.",
         "status": "done",
@@ -78,7 +78,7 @@
         "updatedAt": "2025-10-18T22:33:58.373Z"
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Create Database Schema and Supabase Setup",
         "description": "Set up Supabase project and implement the complete database schema with proper relationships and Row Level Security policies.",
         "status": "done",
@@ -158,7 +158,7 @@
         "updatedAt": "2025-10-15T17:36:45.827Z"
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Integrate Voltagent AI Framework",
         "description": "Set up the Voltagent AI framework to orchestrate all three AI agents that power the research, project idea generation, and email outreach features with real intelligence.",
         "status": "done",
@@ -236,7 +236,7 @@
         "updatedAt": "2025-10-16T02:46:16.860Z"
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Implement User Onboarding Flow",
         "description": "Connect the existing multi-step onboarding form to Clerk for user creation and Supabase for profile data storage.",
         "status": "done",
@@ -318,7 +318,7 @@
         "updatedAt": "2025-10-16T03:10:03.909Z"
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Build Basic Dashboard and Navigation",
         "description": "Connect the Dashboard component to real data from Supabase, replacing mock data with actual user stats, saved companies, and recent activity.",
         "status": "done",
@@ -399,7 +399,7 @@
         "updatedAt": "2025-10-18T22:25:26.667Z"
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Implement Company Discovery Feature",
         "description": "Connect the existing company discovery UI to real data from Supabase, replacing mock company data with actual database queries and implementing the filtering/search functionality.",
         "status": "done",
@@ -478,7 +478,7 @@
         "updatedAt": "2025-10-18T23:29:52.878Z"
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Build Project Portfolio Management",
         "description": "Connect the existing Portfolio page to Supabase database, replacing mock portfolio data with real data storage and retrieval.",
         "status": "pending",
@@ -493,7 +493,7 @@
         "subtasks": []
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Create Project Idea Generation Feature",
         "description": "Implement the AI-powered project idea generation feature that suggests targeted projects based on company research and user skills using Voltagent to power the existing ProjectIdeas page.",
         "status": "pending",
@@ -508,22 +508,113 @@
         "subtasks": []
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Develop Company Research Feature",
-        "description": "Implement the deep company research feature powered by Voltagent AI that provides comprehensive intelligence on business model, technical landscape, key personnel, and pain points.",
-        "status": "pending",
+        "description": "Implement a comprehensive deep company research agent powered by the VoltAgent framework that provides intelligence on business model, technical landscape, key personnel, and pain points.",
+        "status": "in-progress",
         "dependencies": [
           "2",
           "3",
           "7"
         ],
         "priority": "medium",
-        "details": "1. Create research request UI with company context\n2. Design research results page with expandable sections\n3. Implement sections for Business Intelligence, Technical Landscape, Key People, Opportunity Signals\n4. Add pain points summary with severity ratings\n5. Create research storage in company_research table\n6. Implement export functionality for research reports\n7. Add loading states for research generation\n8. Create initial version with mock data templates\n9. Integrate with Voltagent AI framework for deep research capabilities\n10. Connect to /voltagent/research endpoint for real-time intelligence\n11. Implement streaming responses for progressive research display\n12. Add save and reference functionality for later use\n13. Create engaging loading states with agent progress indicators",
-        "testStrategy": "1. Test research request flow with sample companies\n2. Verify research results display correctly\n3. Test expandable sections functionality\n4. Validate export feature for different formats\n5. Test loading states and animations\n6. Verify data persistence in database\n7. Test responsive design on different devices\n8. Verify Voltagent integration with real research generation\n9. Test streaming response functionality\n10. Validate error handling and retry mechanisms",
-        "subtasks": []
+        "details": "1. Build the actual research agent implementation using VoltAgent framework\n2. Use Warp's MCP server integration to access VoltAgent documentation and learn framework patterns\n3. Implement research agent with VoltAgent components for Business Intelligence, Technical Landscape, Key People, Opportunity Signals\n4. Develop pain points analysis with severity ratings using VoltAgent capabilities\n5. Configure research storage in company_research table\n6. Implement export functionality for research reports\n7. Leverage VoltAgent's built-in loading states and progress indicators\n8. Connect to /voltagent/research endpoint for real-time intelligence\n9. Use VoltAgent's native streaming response capabilities\n10. Implement save and reference functionality for later use\n11. Utilize VoltAgent's built-in UI components for research display\n12. Focus on the actual agent implementation rather than custom orchestration",
+        "testStrategy": "1. Test research agent with sample companies using VoltAgent test harness\n2. Verify research results display correctly through VoltAgent output handlers\n3. Test expandable sections functionality in the research display\n4. Validate export feature for different formats\n5. Test VoltAgent's native loading states and animations\n6. Verify data persistence in company_research database\n7. Test responsive design on different devices\n8. Verify VoltAgent framework integration with real research generation\n9. Test VoltAgent's streaming response functionality\n10. Validate error handling and retry mechanisms built into VoltAgent",
+        "subtasks": [
+          {
+            "id": 2,
+            "title": "Implement Business Intelligence Research Component",
+            "description": "Develop the VoltAgent component responsible for gathering and analyzing business model, revenue streams, market position, and competitive landscape information.",
+            "dependencies": [
+              1
+            ],
+            "details": "Build the Business Intelligence component based on the completed architecture design. Implement data retrieval tools for company financials, market analysis, and competitive positioning. Configure VoltAgent's reasoning capabilities to synthesize business model insights and identify revenue streams. Ensure the component follows the standardized JSON schema for output consistency.",
+            "status": "pending",
+            "testStrategy": "Test the component with sample companies of different sizes and industries. Verify accurate business model identification and revenue stream analysis. Validate output against the defined JSON schema."
+          },
+          {
+            "id": 3,
+            "title": "Implement Technical Landscape Research Component",
+            "description": "Develop the VoltAgent component for analyzing a company's technology stack, infrastructure, development practices, and technical challenges.",
+            "dependencies": [
+              1
+            ],
+            "details": "Build the Technical Landscape component following the architecture design. Implement tools for tech stack identification, infrastructure analysis, and development methodology assessment. Configure VoltAgent's reasoning to identify technical debt and challenges. Ensure the component produces standardized outputs according to the defined schema.",
+            "status": "pending",
+            "testStrategy": "Test with companies across different technical domains. Verify accurate tech stack identification and technical challenge assessment. Validate output format and integration with other components."
+          },
+          {
+            "id": 4,
+            "title": "Implement Key Personnel Research Component",
+            "description": "Develop the VoltAgent component for identifying and analyzing key leadership, technical roles, and decision-makers within target companies.",
+            "dependencies": [
+              1
+            ],
+            "details": "Build the Key Personnel component based on the architecture design. Implement tools for leadership identification, role analysis, and decision-maker mapping. Configure VoltAgent's reasoning to assess leadership experience and influence. Ensure the component follows the standardized output schema for consistent integration.",
+            "status": "pending",
+            "testStrategy": "Test with various company leadership structures. Verify accurate identification of key decision-makers and technical leaders. Validate output format and integration with other research components."
+          },
+          {
+            "id": 5,
+            "title": "Implement Opportunity Signals and Pain Points Analysis",
+            "description": "Develop the VoltAgent component for identifying business opportunities, pain points, and assigning severity ratings to potential challenges.",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Build the Opportunity Signals and Pain Points component that synthesizes insights from other research components. Implement VoltAgent's reasoning capabilities to identify business challenges and opportunities. Create a severity rating system for pain points using VoltAgent's analysis tools. Ensure the component produces actionable insights in the standardized format.",
+            "status": "pending",
+            "testStrategy": "Test with companies facing known challenges. Verify accurate identification of pain points and appropriate severity ratings. Validate that opportunities are relevant to the company's context and business model."
+          },
+          {
+            "id": 6,
+            "title": "Implement Research Storage and Export Functionality",
+            "description": "Configure persistent storage for research results in the company_research table and implement export functionality for research reports.",
+            "dependencies": [
+              5
+            ],
+            "details": "Integrate VoltAgent output handlers to save research results to the company_research table. Develop export features supporting multiple formats (PDF, CSV, JSON) using VoltAgent's built-in output handlers. Implement save and reference functionality for later retrieval of research data.",
+            "status": "pending",
+            "testStrategy": "Test saving research data for various companies. Verify export functionality across all supported formats. Validate data integrity and retrieval capabilities from the company_research table."
+          },
+          {
+            "id": 7,
+            "title": "Connect Research Agent to /voltagent/research Endpoint",
+            "description": "Integrate the completed research agent with the existing /voltagent/research endpoint for real-time intelligence streaming.",
+            "dependencies": [
+              6
+            ],
+            "details": "Connect the research agent to the /voltagent/research endpoint established in Task 3 (Integrate Voltagent AI Framework). Implement streaming response handling to provide real-time research updates. Configure proper error handling, retry logic, and rate limiting for the research agent.",
+            "status": "pending",
+            "testStrategy": "Test endpoint integration with various company research requests. Verify streaming responses work correctly. Validate error handling and retry mechanisms under different failure scenarios."
+          },
+          {
+            "id": 8,
+            "title": "Implement Research Display UI Components",
+            "description": "Develop the UI components for displaying research results using VoltAgent's built-in UI components and display handlers.",
+            "dependencies": [
+              7
+            ],
+            "details": "Use VoltAgent's native UI components to build expandable sections for each research domain. Implement loading states and progress indicators for real-time feedback. Create interactive elements for exploring research data and accessing export functionality.",
+            "status": "pending",
+            "testStrategy": "Test UI display with various research results. Verify expandable sections work correctly. Validate loading states and progress indicators provide meaningful feedback. Test responsive design across different devices."
+          },
+          {
+            "id": 1,
+            "title": "Design VoltAgent-Based Research Agent Architecture",
+            "description": "Define the agent structure and components using VoltAgent framework to cover business intelligence, technical landscape, key personnel, opportunity signals, and pain points.",
+            "dependencies": [],
+            "details": "Map out the agent roles and workflows using VoltAgent's modular abstractions. Specify which VoltAgent components will handle each research domain. Ensure the design leverages VoltAgent's built-in memory, tool integration, and streaming capabilities for real-time intelligence.\n<info added on 2025-10-20T17:07:31.531Z>\nSuccessfully completed the design of the VoltAgent-based research agent architecture. The architecture includes specialized agent components for each research domain: Business Intelligence, Technical Landscape, Key Personnel, Opportunity Signals, and Pain Points Analysis. Each component leverages VoltAgent's memory system for context retention and tool integration capabilities for data retrieval. Created comprehensive documentation detailing the agent workflows, component interactions, and data flow patterns. Developed JSON schemas for standardizing research outputs across all domains. The architecture maximizes VoltAgent's streaming capabilities to provide real-time intelligence updates during research operations.\n</info added on 2025-10-20T17:07:31.531Z>",
+            "status": "done",
+            "testStrategy": "Review architecture against VoltAgent documentation and validate component mapping with sample scenarios.",
+            "updatedAt": "2025-10-20T17:08:11.766Z",
+            "parentId": "undefined"
+          }
+        ]
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Scaffold VoltAgent Server with Observability (Pre-Agent Implementation)",
         "description": "Set up a minimal VoltAgent server package focused on observability, integrating VoltOps monitoring and preparing environment/configuration for future agent migrations.",
         "status": "done",
@@ -598,7 +689,7 @@
         "updatedAt": "2025-10-20T16:16:22.851Z"
       },
       {
-        "id": "11",
+        "id": 11,
         "title": "Implement Email Generation Feature",
         "description": "Create the personalized email generation feature using Voltagent AI to craft outreach emails based on user profile, company research, and project details.",
         "status": "pending",
@@ -616,12 +707,14 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-20T16:16:22.851Z",
+      "lastModified": "2025-10-20T17:08:11.767Z",
       "taskCount": 11,
       "completedCount": 7,
       "tags": [
         "master"
-      ]
+      ],
+      "created": "2025-10-20T17:10:55.417Z",
+      "description": "Tasks for master context"
     }
   }
 }
