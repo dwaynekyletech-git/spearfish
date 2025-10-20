@@ -526,14 +526,76 @@
         "id": "7",
         "title": "Scaffold VoltAgent Server with Observability (Pre-Agent Implementation)",
         "description": "Set up a minimal VoltAgent server package focused on observability, integrating VoltOps monitoring and preparing environment/configuration for future agent migrations.",
-        "details": "1. Create a new Node.js package (e.g., /packages/voltagent-server) using Hono as the HTTP server framework and install @voltagent/core and @voltagent/server-hono (or equivalent adapter).\n2. Implement a minimal VoltAgent server that enables VoltAgentObservability (in-memory by default) and exposes a local WebSocket endpoint for real-time monitoring. Do not migrate any business logic or agent implementations yet—Supabase Edge Functions and UI remain unchanged.\n3. Use the existing MCP server integration in Warp to fetch and document VoltAgent observability docs (observability/overview.md, observability/developer-console.md, agents/overview.md) via MCP tools (list_voltagent_docs, get_voltagent_doc). Summarize expected environment variables, keys, and ports required by VoltOps in README/WARP notes.\n4. Add VOLTAGENT_PUBLIC_KEY and VOLTAGENT_SECRET_KEY to .env.example, with documentation on how to obtain and configure these for VoltOps export. Note that persistence (e.g., LibSQL) is not required now, but mention @voltagent/libsql adapter for future reference.\n5. Add a package.json script \"voltagent:dev\" to start the server locally (default http://localhost:3141). Provide a dev script and clear instructions in README/WARP notes for running the server, opening the VoltOps console (https://console.voltagent.dev), and verifying the connection.\n6. Clearly document that all business logic and agent migrations will be handled in future per-agent tasks (research, project-generator, email-outreach) after stabilization. Include explicit notes to keep Supabase Edge Functions and UI as-is for now.",
-        "testStrategy": "1. Run 'npm run voltagent:dev' and verify the VoltAgent server starts at http://localhost:3141 with observability enabled (check for startup logs and WebSocket endpoint).\n2. Confirm @voltagent/core and @voltagent/server-hono (or equivalent) are installed and imported correctly.\n3. Check that VOLTAGENT_PUBLIC_KEY and VOLTAGENT_SECRET_KEY are present in .env.example and referenced in server code; verify documentation for obtaining/configuring these keys is clear.\n4. Use MCP tools to fetch and display observability documentation; ensure README/WARP notes include summarized steps and expected configuration.\n5. Open https://console.voltagent.dev and verify the local server is visible and real-time monitoring is functional (WebSocket view).\n6. Ensure README/WARP notes specify that Supabase Edge Functions and UI remain unchanged, and that future agent migrations are planned as follow-up tasks.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           "3"
         ],
         "priority": "medium",
-        "subtasks": []
+        "details": "1. Create a new Node.js package (e.g., /packages/voltagent-server) using Hono as the HTTP server framework and install @voltagent/core and @voltagent/server-hono (or equivalent adapter).\n2. Implement a minimal VoltAgent server that enables VoltAgentObservability (in-memory by default) and exposes a local WebSocket endpoint for real-time monitoring. Do not migrate any business logic or agent implementations yet—Supabase Edge Functions and UI remain unchanged.\n3. Use the existing MCP server integration in Warp to fetch and document VoltAgent observability docs (observability/overview.md, observability/developer-console.md, agents/overview.md) via MCP tools (list_voltagent_docs, get_voltagent_doc). Summarize expected environment variables, keys, and ports required by VoltOps in README/WARP notes.\n4. Add VOLTAGENT_PUBLIC_KEY and VOLTAGENT_SECRET_KEY to .env.example, with documentation on how to obtain and configure these for VoltOps export. Note that persistence (e.g., LibSQL) is not required now, but mention @voltagent/libsql adapter for future reference.\n5. Add a package.json script \"voltagent:dev\" to start the server locally (default http://localhost:3141). Provide a dev script and clear instructions in README/WARP notes for running the server, opening the VoltOps console (https://console.voltagent.dev), and verifying the connection.\n6. Clearly document that all business logic and agent migrations will be handled in future per-agent tasks (research, project-generator, email-outreach) after stabilization. Include explicit notes to keep Supabase Edge Functions and UI as-is for now.",
+        "testStrategy": "1. Run 'npm run voltagent:dev' and verify the VoltAgent server starts at http://localhost:3141 with observability enabled (check for startup logs and WebSocket endpoint).\n2. Confirm @voltagent/core and @voltagent/server-hono (or equivalent) are installed and imported correctly.\n3. Check that VOLTAGENT_PUBLIC_KEY and VOLTAGENT_SECRET_KEY are present in .env.example and referenced in server code; verify documentation for obtaining/configuring these keys is clear.\n4. Use MCP tools to fetch and display observability documentation; ensure README/WARP notes include summarized steps and expected configuration.\n5. Open https://console.voltagent.dev and verify the local server is visible and real-time monitoring is functional (WebSocket view).\n6. Ensure README/WARP notes specify that Supabase Edge Functions and UI remain unchanged, and that future agent migrations are planned as follow-up tasks.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Scaffold pnpm workspace and voltagent-server package",
+            "description": "Create a new Node.js package in the packages directory using Hono as the HTTP server framework and install required dependencies.",
+            "dependencies": [],
+            "details": "Created pnpm workspace and set up packages/voltagent-server with Hono-based VoltAgent server. Installed @voltagent/core, @voltagent/server-hono, and other required dependencies. Successfully typechecked the server package.",
+            "status": "done",
+            "testStrategy": "Verify package structure and dependencies are correctly installed. Run typecheck to ensure no type errors.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement in-memory observability and environment configuration",
+            "description": "Set up VoltAgentObservability with in-memory configuration and add required environment variables.",
+            "dependencies": [
+              1
+            ],
+            "details": "Added in-memory observability configuration to the server. Created .env.example with VOLTAGENT_PUBLIC_KEY, VOLTAGENT_SECRET_KEY, and VOLTAGENT_PORT environment variables. Added documentation on how to obtain and configure these keys for VoltOps export.",
+            "status": "done",
+            "testStrategy": "Check that environment variables are properly documented and the server code references them correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add development scripts and documentation",
+            "description": "Create scripts for local development and add comprehensive documentation in README.",
+            "dependencies": [
+              2
+            ],
+            "details": "Added 'voltagent:dev' script to root package.json for starting the server locally. Created README with clear instructions for running the server, connecting to VoltOps console, and verifying the connection. Documented that business logic and agent migrations will be handled in future tasks.",
+            "status": "done",
+            "testStrategy": "Verify the script exists and README contains all required documentation.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Verify server connection with VoltOps console",
+            "description": "Run the server locally and verify connection with the VoltOps console.",
+            "dependencies": [
+              3
+            ],
+            "details": "Run the server using 'pnpm voltagent:dev' and verify that it starts correctly. Open https://console.voltagent.dev and confirm that the local server is visible and real-time monitoring is functional via WebSocket.",
+            "status": "done",
+            "testStrategy": "Start the server locally and verify connection with VoltOps console. Check that observability data is being transmitted correctly.",
+            "updatedAt": "2025-10-20T16:16:19.735Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Document MCP integration for VoltAgent observability",
+            "description": "Use MCP server integration to fetch and document VoltAgent observability documentation.",
+            "dependencies": [
+              4
+            ],
+            "details": "Use existing MCP server integration to fetch VoltAgent observability docs (observability/overview.md, observability/developer-console.md, agents/overview.md) via MCP tools. Summarize environment variables, keys, and ports required by VoltOps in documentation.",
+            "status": "done",
+            "testStrategy": "Verify that MCP tools can fetch and display observability documentation. Ensure documentation includes all necessary configuration details.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-20T16:16:22.851Z"
+          }
+        ],
+        "updatedAt": "2025-10-20T16:16:22.851Z"
       },
       {
         "id": "11",
@@ -554,9 +616,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-18T23:29:52.878Z",
+      "lastModified": "2025-10-20T16:16:22.851Z",
       "taskCount": 11,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "master"
       ]
