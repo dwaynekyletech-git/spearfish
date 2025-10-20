@@ -39,7 +39,7 @@ export function AppHeader({ user, currentPage }: AppHeaderProps) {
               <Target className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-black text-foreground uppercase tracking-tight">
-              SpearfishIn AI
+              SPEARFISH
             </span>
           </Link>
 

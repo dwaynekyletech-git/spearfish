@@ -104,7 +104,16 @@ export function useSavedCompanies(limit: number = 4) {
       if (error) throw error
 
       // Transform the data to match our interface
-      const companies: SavedCompany[] = (data || []).map((item: any) => ({
+      type SavedRow = {
+        companies: {
+          id: string
+          name: string
+          one_liner: string
+          small_logo_thumb_url?: string
+          website?: string
+        }
+      }
+      const companies: SavedCompany[] = ((data as SavedRow[]) || []).map((item) => ({
         id: item.companies.id,
         name: item.companies.name,
         one_liner: item.companies.one_liner,
@@ -170,7 +179,8 @@ export function useRecentActivity(limit: number = 4) {
 
       // Add research activities
       if (recentResearch) {
-        activities.push(...recentResearch.map((item: any) => ({
+        type ResearchRow = { id: string; created_at: string; companies?: { name?: string } | null }
+        activities.push(...(recentResearch as ResearchRow[]).map((item) => ({
           id: `research-${item.id}`,
           action: `Researched ${item.companies?.name || 'a company'}`,
           time: formatTimeAgo(new Date(item.created_at)),
@@ -181,7 +191,8 @@ export function useRecentActivity(limit: number = 4) {
 
       // Add project activities
       if (recentProjects) {
-        activities.push(...recentProjects.map((item: any) => ({
+        type ProjectRow = { id: string; title: string; created_at: string }
+        activities.push(...(recentProjects as ProjectRow[]).map((item) => ({
           id: `project-${item.id}`,
           action: `Added project: ${item.title}`,
           time: formatTimeAgo(new Date(item.created_at)),
@@ -192,7 +203,8 @@ export function useRecentActivity(limit: number = 4) {
 
       // Add email activities
       if (recentEmails) {
-        activities.push(...recentEmails.map((item: any) => ({
+        type EmailRow = { id: string; created_at: string; companies?: { name?: string } | null }
+        activities.push(...(recentEmails as EmailRow[]).map((item) => ({
           id: `email-${item.id}`,
           action: `Sent outreach to ${item.companies?.name || 'a company'}`,
           time: formatTimeAgo(new Date(item.created_at)),

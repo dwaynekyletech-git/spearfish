@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Search, SlidersHorizontal, Building2, Users, GitBranch, Briefcase } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Search, SlidersHorizontal, Building2, Users, Briefcase, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -17,183 +18,134 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getSupabaseAuthed } from "@/lib/supabaseClient";
+import { useCompanyBookmark } from "@/hooks/useCompanyBookmark";
 
-const mockCompanies = [
-  {
-    id: 1,
-    name: "PathAI",
-    slug: "pathai",
-    one_liner: "AI-powered pathology diagnostics for cancer detection",
-    long_description: "PathAI is developing AI-powered technology to improve the accuracy of diagnosis in pathology, starting with cancer.",
-    small_logo_thumb_url: "",
-    website: "https://pathai.com",
-    all_locations: ["Boston, MA, USA"],
-    batch: "W22",
-    team_size: 45,
-    stage: "Series B",
-    isHiring: true,
-    industries: ["Healthcare", "AI"],
-    launched_at: "2016-01-15T00:00:00Z",
-    url: "https://www.ycombinator.com/companies/pathai",
-    // Custom Spearfish fields
-    githubActivity: "High",
-    score: 94,
-  },
-  {
-    id: 2,
-    name: "Watershed",
-    slug: "watershed",
-    one_liner: "Enterprise carbon accounting and climate platform",
-    long_description: "Watershed helps companies measure, reduce, and report their carbon emissions with enterprise-grade software.",
-    small_logo_thumb_url: "",
-    website: "https://watershed.com",
-    all_locations: ["San Francisco, CA, USA"],
-    batch: "S19",
-    team_size: 120,
-    stage: "Series C",
-    isHiring: true,
-    industries: ["Climate", "Enterprise"],
-    launched_at: "2019-06-01T00:00:00Z",
-    url: "https://www.ycombinator.com/companies/watershed",
-    // Custom Spearfish fields
-    githubActivity: "Medium",
-    score: 88,
-  },
-  {
-    id: 3,
-    name: "Mutiny",
-    slug: "mutiny",
-    one_liner: "No-code AI personalization for B2B websites",
-    long_description: "Mutiny enables B2B companies to personalize their websites for every visitor without writing code.",
-    small_logo_thumb_url: "",
-    website: "https://mutinyhq.com",
-    all_locations: ["San Francisco, CA, USA"],
-    batch: "W18",
-    team_size: 65,
-    stage: "Series B",
-    isHiring: false,
-    industries: ["Marketing", "AI"],
-    launched_at: "2018-01-01T00:00:00Z",
-    url: "https://www.ycombinator.com/companies/mutiny",
-    // Custom Spearfish fields
-    githubActivity: "High",
-    score: 92,
-  },
-  {
-    id: 4,
-    name: "Ramp",
-    slug: "ramp",
-    one_liner: "Finance automation and corporate cards",
-    long_description: "Ramp is the finance automation platform designed to save businesses time and money.",
-    small_logo_thumb_url: "",
-    website: "https://ramp.com",
-    all_locations: ["New York, NY, USA"],
-    batch: "W19",
-    team_size: 280,
-    stage: "Series D",
-    isHiring: true,
-    industries: ["Fintech", "SaaS"],
-    launched_at: "2019-02-01T00:00:00Z",
-    url: "https://www.ycombinator.com/companies/ramp",
-    // Custom Spearfish fields
-    githubActivity: "Very High",
-    score: 85,
-  },
-  {
-    id: 5,
-    name: "Loom",
-    slug: "loom",
-    one_liner: "Async video messaging for work",
-    long_description: "Loom is a video messaging tool that helps you get your message across through instantly shareable videos.",
-    small_logo_thumb_url: "",
-    website: "https://loom.com",
-    all_locations: ["San Francisco, CA, USA"],
-    batch: "W16",
-    team_size: 150,
-    stage: "Series C",
-    isHiring: true,
-    industries: ["Productivity", "Video"],
-    launched_at: "2016-01-01T00:00:00Z",
-    url: "https://www.ycombinator.com/companies/loom",
-    // Custom Spearfish fields
-    githubActivity: "Medium",
-    score: 79,
-  },
-  {
-    id: 6,
-    name: "Retool",
-    slug: "retool",
-    one_liner: "Build internal tools with drag-and-drop",
-    long_description: "Retool is a fast way to build internal tools. Drag-and-drop our building blocks and connect them to your databases and APIs.",
-    small_logo_thumb_url: "",
-    website: "https://retool.com",
-    all_locations: ["San Francisco, CA, USA"],
-    batch: "W17",
-    team_size: 200,
-    stage: "Series C",
-    isHiring: true,
-    industries: ["Developer Tools", "SaaS"],
-    launched_at: "2017-01-01T00:00:00Z",
-    url: "https://www.ycombinator.com/companies/retool",
-    // Custom Spearfish fields
-    githubActivity: "High",
-    score: 91,
-  }
+const industries = [
+  "AI",
+  "Healthcare",
+  "Climate",
+  "Fintech",
+  "SaaS",
+  "Developer Tools",
+  "Marketing",
+  "Productivity",
 ];
 
-const batches = ["All", "W22", "S22", "W23", "S23", "W24"];
-const industries = ["AI", "Healthcare", "Climate", "Fintech", "SaaS", "Developer Tools", "Marketing", "Productivity"];
+interface Company {
+  id: string;
+  yc_id: number | null;
+  name: string;
+  one_liner: string | null;
+  small_logo_thumb_url: string | null;
+  website: string | null;
+  batch: string | null;
+  team_size: number | null;
+  stage: string | null;
+  is_hiring: boolean | null;
+  industries: string[] | null;
+}
+
+function BookmarkButton({ companyId }: { companyId: string }) {
+  const { isBookmarked, isLoading, toggleBookmark } = useCompanyBookmark(companyId);
+
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleBookmark();
+      }}
+      disabled={isLoading}
+      className="absolute top-4 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors disabled:opacity-50"
+      aria-label={isBookmarked ? "Remove bookmark" : "Bookmark company"}
+    >
+      <Heart
+        className={`h-5 w-5 transition-colors ${
+          isBookmarked
+            ? "fill-primary text-primary"
+            : "text-muted-foreground hover:text-primary"
+        }`}
+      />
+    </button>
+  );
+}
 
 export default function CompanyDiscovery() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBatch, setSelectedBatch] = useState("All");
   const [hiringOnly, setHiringOnly] = useState(false);
-  const [teamSize, setTeamSize] = useState([0, 500]);
+  const [teamSize, setTeamSize] = useState<[number, number]>([0, 500]);
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState("score");
+  const [sortBy, setSortBy] = useState("teamSize");
+  const [page, setPage] = useState(0);
+  const pageSize = 24;
 
-  const user = {
+  const user = useMemo(() => ({
     name: "Alex Chen",
     email: "alex@example.com",
     avatar: "",
-  };
+  }), []);
 
   const toggleIndustry = (industry: string) => {
-    setSelectedIndustries(prev =>
+    setSelectedIndustries((prev) =>
       prev.includes(industry)
-        ? prev.filter(i => i !== industry)
+        ? prev.filter((i) => i !== industry)
         : [...prev, industry]
     );
   };
 
   const clearFilters = () => {
     setSearchQuery("");
-    setSelectedBatch("All");
     setHiringOnly(false);
     setTeamSize([0, 500]);
     setSelectedIndustries([]);
+    setPage(0);
   };
 
-  const filteredCompanies = mockCompanies
-    .filter(company => {
-      if (searchQuery && !company.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !company.one_liner.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      "companies",
+      { searchQuery, hiringOnly, teamSize, selectedIndustries, sortBy, page, pageSize },
+    ],
+    queryFn: async () => {
+      const supabase = await getSupabaseAuthed();
+      let query = supabase
+        .from("companies")
+        .select(
+          "id,yc_id,name,one_liner,small_logo_thumb_url,website,batch,team_size,stage,is_hiring,industries",
+          { count: "exact" }
+        );
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim();
+        query = query.or(
+          `name.ilike.%${q}%,one_liner.ilike.%${q}%`
+        );
       }
-      if (selectedBatch !== "All" && company.batch !== selectedBatch) return false;
-      if (hiringOnly && !company.isHiring) return false;
-      if (company.team_size < teamSize[0] || company.team_size > teamSize[1]) return false;
-      if (selectedIndustries.length > 0 && !company.industries.some(i => selectedIndustries.includes(i))) {
-        return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "score") return b.score - a.score;
-      if (sortBy === "teamSize") return b.team_size - a.team_size;
-      if (sortBy === "batch") return b.batch.localeCompare(a.batch);
-      return 0;
-    });
+
+      if (hiringOnly) query = query.eq("is_hiring", true);
+      if (teamSize[0] > 0) query = query.gte("team_size", teamSize[0]);
+      if (teamSize[1] < 500) query = query.lte("team_size", teamSize[1]);
+      if (selectedIndustries.length > 0)
+        query = query.overlaps("industries", selectedIndustries);
+
+      if (sortBy === "teamSize") query = query.order("team_size", { ascending: false });
+      else if (sortBy === "batch") query = query.order("batch", { ascending: false });
+      else query = query.order("created_at", { ascending: false });
+
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+      if (error) throw error;
+      return { rows: (data as Company[]) || [], count: count || 0 };
+    },
+    staleTime: 60_000,
+  });
+
+  const companies = data?.rows ?? [];
+  const total = data?.count ?? 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -222,9 +174,9 @@ export default function CompanyDiscovery() {
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="score">Opportunity Score</SelectItem>
                 <SelectItem value="teamSize">Team Size</SelectItem>
                 <SelectItem value="batch">Batch</SelectItem>
+                <SelectItem value="score">Opportunity Score (N/A)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -259,25 +211,13 @@ export default function CompanyDiscovery() {
                     <Input
                       placeholder="Search companies..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setPage(0);
+                      }}
                       className="pl-9"
                     />
                   </div>
-                </div>
-
-                {/* Batch */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Batch</Label>
-                  <Select value={selectedBatch} onValueChange={setSelectedBatch}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {batches.map(batch => (
-                        <SelectItem key={batch} value={batch}>{batch}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
 
                 {/* Hiring Status */}
@@ -289,7 +229,10 @@ export default function CompanyDiscovery() {
                     <Switch
                       id="hiring-toggle"
                       checked={hiringOnly}
-                      onCheckedChange={setHiringOnly}
+                      onCheckedChange={(v) => {
+                        setHiringOnly(!!v);
+                        setPage(0);
+                      }}
                     />
                   </div>
                 </div>
@@ -300,7 +243,10 @@ export default function CompanyDiscovery() {
                   <div className="px-2">
                     <Slider
                       value={teamSize}
-                      onValueChange={setTeamSize}
+                      onValueChange={(v) => {
+                        setTeamSize(v as [number, number]);
+                        setPage(0);
+                      }}
                       min={0}
                       max={500}
                       step={10}
@@ -317,12 +263,15 @@ export default function CompanyDiscovery() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Industries</Label>
                   <div className="flex flex-wrap gap-2">
-                    {industries.map(industry => (
+                    {industries.map((industry) => (
                       <Badge
                         key={industry}
                         variant={selectedIndustries.includes(industry) ? "default" : "outline"}
                         className="cursor-pointer"
-                        onClick={() => toggleIndustry(industry)}
+                        onClick={() => {
+                          toggleIndustry(industry);
+                          setPage(0);
+                        }}
                       >
                         {industry}
                       </Badge>
@@ -336,21 +285,25 @@ export default function CompanyDiscovery() {
           {/* Main Grid */}
           <main className="flex-1">
             <div className="mb-4 text-sm text-muted-foreground">
-              Showing {filteredCompanies.length} {filteredCompanies.length === 1 ? 'company' : 'companies'}
+              {isLoading ? "Loading companies..." : `Showing ${companies.length} of ${total} ${total === 1 ? "company" : "companies"}`}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {filteredCompanies.map(company => (
-                <Card key={company.id} className="group hover:shadow-xl transition-shadow">
+              {companies.map((company) => (
+                <Card key={company.id} className="group hover:shadow-xl transition-shadow relative">
+                  <BookmarkButton companyId={company.id} />
                   <CardHeader className="pb-4 space-y-4">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center text-3xl font-bold text-muted-foreground shrink-0">
-                        {company.small_logo_thumb_url || company.name.charAt(0)}
-                      </div>
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="h-16 w-16 rounded-full border-4 border-primary flex items-center justify-center bg-background shadow-sm">
-                          <span className="text-2xl font-bold text-primary">{company.score}</span>
-                        </div>
-                        <span className="text-xs font-medium text-muted-foreground">Score</span>
+                      <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center text-3xl font-bold text-muted-foreground shrink-0 overflow-hidden">
+                        {company.small_logo_thumb_url ? (
+                          <img
+                            src={company.small_logo_thumb_url}
+                            alt={company.name}
+                            className="w-full h-full object-contain p-2"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          company.name.charAt(0)
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -358,8 +311,10 @@ export default function CompanyDiscovery() {
                       <p className="text-sm text-muted-foreground leading-relaxed min-h-[40px]">{company.one_liner}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="text-xs font-semibold">{company.batch}</Badge>
-                      {company.isHiring && (
+                      {company.batch && (
+                        <Badge variant="secondary" className="text-xs font-semibold">{company.batch}</Badge>
+                      )}
+                      {company.is_hiring && (
                         <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs font-semibold">
                           Hiring
                         </Badge>
@@ -370,15 +325,11 @@ export default function CompanyDiscovery() {
                     <div className="space-y-3 text-sm">
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Users className="h-4 w-4 shrink-0" />
-                        <span>{company.team_size} people</span>
+                        <span>{company.team_size ?? 0} people</span>
                       </div>
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Briefcase className="h-4 w-4 shrink-0" />
-                        <span>{company.stage}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <GitBranch className="h-4 w-4 shrink-0" />
-                        <span>{company.githubActivity} Activity</span>
+                        <span>{company.stage || ""}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -393,7 +344,7 @@ export default function CompanyDiscovery() {
               ))}
             </div>
 
-            {filteredCompanies.length === 0 && (
+            {!isLoading && companies.length === 0 && (
               <div className="text-center py-12">
                 <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-2">No companies found</h3>
@@ -401,6 +352,21 @@ export default function CompanyDiscovery() {
                 <Button onClick={clearFilters} variant="outline">Clear Filters</Button>
               </div>
             )}
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-8">
+              <Button variant="outline" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+                Previous
+              </Button>
+              <div className="text-sm text-muted-foreground">Page {page + 1}</div>
+              <Button
+                variant="outline"
+                disabled={(page + 1) * pageSize >= total}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
           </main>
         </div>
       </div>

@@ -1,45 +1,172 @@
-# Spearfishin AI - Warp Agent Mode Project Guide
+# WARP.md
 
-## Project Overview
+This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
-This is a React/Vite application with ShadCN UI components, managed with Task Master AI for development workflow organization.
+## Development Commands
 
-## Key Project Information
+```bash
+# Development
+pnpm i                   # Install dependencies
+pnpm dev                 # Start development server with Turbopack
+pnpm build               # Build production app with Turbopack
+pnpm start               # Start production server
+pnpm preview             # Preview production build
+pnpm lint                # Run ESLint
+
+# Type Checking
+pnpm tsc --noEmit        # Run TypeScript compiler to check for type errors
+
+# Supabase (if working locally)
+supabase login
+supabase link --project-ref <your-ref>
+supabase db push        # Push schema changes
+```
+
+## Project Architecture
 
 ### Technology Stack
-- **Framework**: React 18 with Vite
-- **UI Components**: ShadCN UI (Radix UI primitives)
-- **Styling**: Tailwind CSS with CSS animations
-- **State Management**: React Query (@tanstack/react-query)
-- **Forms**: React Hook Form with Zod validation
-- **Routing**: React Router DOM
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **Package Manager**: npm (has package-lock.json, bun.lockb, pnpm-lock.yaml)
+- **Framework**: React 18 + Vite with SWC
+- **UI**: ShadCN UI (Radix primitives) + Tailwind CSS
+- **Auth**: Clerk (OAuth, user management)
+- **Database**: Supabase (PostgreSQL with Row Level Security)
+- **State**: React Query (@tanstack/react-query)
+- **Forms**: React Hook Form + Zod validation
+- **Routing**: React Router DOM v6
+- **AI Backend**: VoltAgent (custom SSE streaming system)
 
-### Project Structure
+### Authentication Flow
+
+**Clerk ↔ Supabase Sync Pattern**:
+1. Clerk handles all authentication (sign-in, OAuth, sessions)
+2. `useUserSync` hook (in `src/lib/auth/userSync.ts`) syncs users to Supabase on mount
+3. Clerk JWT tokens are used to authenticate Supabase operations via custom JWT template
+4. All protected routes use `<ProtectedRoute>` wrapper in `App.tsx`
+5. **Critical**: Edge Functions receive `userId` from client, then use service role internally
+
+**Authentication Setup**:
+- Client code uses `VITE_CLERK_PUBLISHABLE_KEY` and `VITE_SUPABASE_ANON_KEY`
+- Edge Functions use `SUPABASE_SERVICE_ROLE_KEY` for database operations
+- Never expose service role key to client code
+
+### Database Architecture
+
+**Schema Overview** (`supabase/schema.sql`):
+- `users` - User profiles (1:1 with Clerk, stores job_title, skills, career_interests, etc.)
+- `companies` - Y Combinator companies catalog (read-only for clients)
+- `user_saved_companies` - Bookmarked companies per user
+- `company_research` - AI-generated research data (business intel, technical landscape, key people, etc.)
+- `project_ideas` - AI-generated project suggestions
+- `projects` - User portfolio projects (with status: in_progress/completed/pitched)
+- `outreach_emails` - Generated emails for companies
+- `voltagent_executions` - Audit log for AI agent runs
+- `clerk_webhook_events` - Webhook event log
+
+**RLS (Row Level Security)**:
+- Enabled on all tables with policies in `supabase/policies.sql`
+- Users can only access/modify their own data
+- Companies table is read-only to clients
+- Edge Functions bypass RLS using service role
+
+### VoltAgent Streaming System
+
+**How It Works**:
+- VoltAgent is a custom SSE (Server-Sent Events) streaming system for AI agents
+- Located in `src/lib/voltagentClient.ts` (client) and `supabase/functions/voltagent-*/index.ts` (server)
+- Three agent types: `research`, `project-generator`, `email-outreach`
+
+**Streaming Pattern**:
+```typescript
+await streamVoltagent({
+  endpoint: 'research',
+  userId: clerkUserId,
+  input: { companyId, userProfile },
+  options: { regeneration: false }
+}, {
+  onProgress: (msg) => { /* status updates */ },
+  onChunk: (data) => { /* partial results */ },
+  onError: (err) => { /* handle errors */ },
+  onDone: () => { /* finalize */ }
+});
+```
+
+**Event Types**:
+- `progress` - Status messages (e.g., "Researching company...")
+- `chunk` - Partial data (e.g., incremental research findings)
+- `error` - Error messages
+- `done` - Stream complete
+
+**Hook**: Use `useVoltagentStream` hook (in `src/hooks/useVoltagentStream.ts`) for React components
+
+### File Structure Conventions
+
 ```
 src/
-├── components/         # Reusable UI components
-├── pages/             # Page components
-├── hooks/             # Custom React hooks
-├── lib/               # Utilities and configurations
-├── styles/            # Global styles
-└── types/             # TypeScript type definitions
+├── components/
+│   └── ui/              # ShadCN components (auto-generated, customize carefully)
+├── pages/               # Route components (match React Router structure)
+├── hooks/               # Custom React hooks
+├── lib/
+│   ├── auth/           # Authentication utilities
+│   ├── supabaseClient.ts  # Supabase client factory
+│   └── voltagentClient.ts # AI agent client
+└── assets/             # Static assets
 
-public/                # Static assets
+supabase/
+├── functions/          # Edge Functions (Deno runtime)
+│   ├── _shared/       # Shared utilities
+│   └── voltagent-*/   # AI agent endpoints
+└── *.sql              # Database schema and migrations
 ```
 
-### Development Commands
+### Important Patterns
+
+**1. Path Aliasing**:
+- Use `@/` for src imports: `import { Button } from "@/components/ui/button"`
+- Configured in `vite.config.ts` and `tsconfig.json`
+
+**2. Supabase Client Usage**:
+- **Browser**: Use `getSupabaseClient()` from `src/lib/supabaseClient.ts` (anon key)
+- **Edge Functions**: Use service role client from `_shared/db.ts`
+- Never use service role in browser code
+
+**3. Protected Routes**:
+- All authenticated pages wrapped in `<ProtectedRoute>` in `App.tsx`
+- `useUserSync` hook ensures Supabase profile exists
+- Redirects to sign-in if not authenticated
+
+**4. Form Validation**:
+- Use React Hook Form + Zod schemas
+- ShadCN form components already integrated
+
+**5. Data Fetching**:
+- Use React Query for server state
+- Mutations trigger invalidations for cache consistency
+- Queries automatically retry and cache
+
+### Environment Variables
+
+**Required**:
 ```bash
-npm run dev            # Start development server
-npm run build          # Build for production
-npm run build:dev      # Build in development mode
-npm run preview        # Preview production build
-npm run lint           # Run ESLint
+# Clerk (Authentication)
+VITE_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_WEBHOOK_SECRET="whsec_..."
+
+# Supabase (Database)
+VITE_SUPABASE_URL="https://xxx.supabase.co"
+VITE_SUPABASE_ANON_KEY="eyJ..."
+SUPABASE_SERVICE_ROLE_KEY="eyJ..."  # Server-only!
+SUPABASE_JWT_SECRET="xxx"           # Server-only!
+
+# AI Models (for VoltAgent)
+ANTHROPIC_API_KEY="sk-ant-..."      # Required
+PERPLEXITY_API_KEY="pplx-..."       # For research features
+OPENAI_API_KEY="sk-proj-..."        # Optional
 ```
 
-## Warp Agent Mode Workflows
+**Important**: 
+- `VITE_*` prefixed vars are exposed to browser
+- Never prefix service role keys or JWT secrets with `VITE_`
+- Use `.env.example` as template
 
 ### Task Master Integration
 
@@ -52,110 +179,56 @@ This project uses Task Master AI for development workflow management. See `.task
 - "Mark current task as complete" - Update task status
 - "Create a new task for fixing the login bug" - Add tasks on the fly
 
-### Development Workflows
+### Common Gotchas
 
-**Starting a new feature:**
-1. "Help me start working on the next available task"
-2. Warp Agent Mode will get the task, show details, and suggest implementation approach
-3. "Create a new component for [feature]" - Scaffold new React components
-4. "Set up the routing for this feature" - Configure React Router
-5. "Add the necessary API calls" - Implement data fetching with React Query
+1. **TypeScript Config**: `noImplicitAny: false` is set - be careful with type safety
+2. **Vite Port**: Dev server runs on port **8080** (not 5173)
+3. **Lovable Integration**: This project was created with Lovable.dev - commits may be auto-generated
+4. **ShadCN Components**: Located in `src/components/ui/` - customize with care
+5. **Edge Functions**: Use Deno runtime, not Node.js (different import syntax)
+6. **RLS Policies**: Always test database operations with anon key to verify RLS works
+7. **Streaming Responses**: VoltAgent uses SSE - don't use standard fetch for AI endpoints
+8. **User Sync**: `useUserSync` must be called in `<ProtectedRoute>` to ensure Supabase profile exists
 
-**Code Quality & Testing:**
-- "Lint and format my code" - Run ESLint and fix formatting
-- "Create tests for this component" - Generate unit tests
-- "Check if my changes break anything" - Run build and validation
-- "Review my changes before committing" - Git diff and review
+### Supabase Setup
 
-**Component Development:**
-- "Create a new ShadCN component for [purpose]" - Scaffold UI components
-- "Style this component with Tailwind" - Apply responsive styling
-- "Make this component accessible" - Add ARIA labels and keyboard navigation
-- "Add form validation with Zod" - Implement form schemas
+**Initial Setup**:
+1. Create Supabase project
+2. Copy environment variables from Project Settings → API
+3. Apply SQL files in order:
+   - `supabase/schema.sql`
+   - `supabase/triggers.sql`
+   - `supabase/policies.sql`
+   - `supabase/storage.sql`
+   - `supabase/realtime.sql`
+4. Configure Clerk webhook in Supabase Edge Functions
 
-### Git & Deployment Workflows
+**Clerk-Supabase JWT Integration**:
+1. In Clerk Dashboard → JWT Templates
+2. Create "Supabase" template
+3. Copy Supabase JWT Secret to template
+4. Use template name "supabase" when getting tokens: `getToken({ template: 'supabase' })`
 
-**Version Control:**
-- "Create a feature branch for task [id]" - Git branching with task context
-- "Commit my changes with a good message" - Contextual commit messages
-- "Prepare this for code review" - Stage, commit, and create PR
-- "Merge this feature and clean up" - Complete feature workflow
+### Key Design Decisions
 
-**Deployment:**
-- "Build the production version" - Run build command
-- "Check the production build" - Run preview and validation
-- "Deploy to production" - Handle deployment workflow
+**Why Clerk + Supabase?**
+- Clerk handles complex auth flows (OAuth, MFA, etc.)
+- Supabase provides database + real-time + storage
+- Clerk JWT tokens authorize Supabase RLS policies
+- Best of both: great auth UX + flexible database
 
-## Project-Specific Context
+**Why VoltAgent (Custom SSE)?**
+- Long-running AI operations need streaming feedback
+- SSE provides progressive updates (better UX than loading spinners)
+- Server-side caching and retry logic
+- Audit trail in `voltagent_executions` table
 
-### Component Libraries
-- Use ShadCN UI components as the foundation
-- Extend with custom components in `src/components/`
-- Follow the established component patterns
-- Use Tailwind CSS for styling
-
-### State Management Patterns
-- Use React Query for server state
-- Local component state with useState/useReducer
-- Context for shared UI state (themes, modals)
-
-### File Organization
-- Components in `src/components/` with co-located styles/tests
-- Pages in `src/pages/` following route structure
-- Custom hooks in `src/hooks/`
-- Utilities in `src/lib/`
-- Types in `src/types/`
-
-### Code Quality Standards
-- TypeScript strict mode enabled
-- ESLint with React and TypeScript rules
-- Consistent component patterns
-- Accessible UI components
-- Responsive design patterns
-
-## Environment & Configuration
-
-### Environment Variables
-Check `.env.example` for required environment variables.
-Configure your `.env` file with:
-- API keys for external services
-- Task Master AI API keys
-- Development/production flags
-
-### Development Setup
-```bash
-npm install            # Install dependencies
-npm run dev            # Start development server
-```
-
-### Task Master Setup
-```bash
-task-master init       # Initialize Task Master (if not done)
-task-master models --setup  # Configure AI models
-```
-
-## Common Warp Agent Mode Requests
-
-### Development
-- "Help me implement [feature] following this project's patterns"
-- "Create a new page component for [route]"
-- "Add form validation for [form]"
-- "Style this component to match the design system"
-- "Fix this TypeScript error"
-- "Add error handling to this API call"
-
-### Task Management
-- "Show me my project roadmap"
-- "What are the high priority tasks?"
-- "Break down this complex feature into subtasks"
-- "Update my progress on the current task"
-
-### Code Quality
-- "Review this code for best practices"
-- "Make this component more accessible"
-- "Optimize this component's performance"
-- "Add comprehensive error boundaries"
+**Why Edge Functions over API Routes?**
+- Supabase Edge Functions run close to database (low latency)
+- Deno runtime is secure and fast
+- Built-in service role access pattern
+- Easy deployment with Supabase CLI
 
 ---
 
-_This guide helps Warp Agent Mode understand the project context and provide relevant assistance for the Spearfishin AI React application._
+_This guide helps Warp Agent Mode understand the Spearfish AI project context and architecture._

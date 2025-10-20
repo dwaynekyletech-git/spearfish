@@ -14,7 +14,7 @@ const Index = () => {
             <div className="w-10 h-10 bg-primary flex items-center justify-center">
               <Target className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-black text-foreground uppercase tracking-tight">SpearfishIn AI</span>
+            <span className="text-2xl font-black text-foreground uppercase tracking-tight">SPEARFISH</span>
           </div>
           <Link to="/auth">
             <Button variant="glow" size="default">Get Started</Button>
@@ -235,7 +235,7 @@ const Index = () => {
                 <div className="w-10 h-10 bg-primary flex items-center justify-center">
                   <Target className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <span className="text-2xl font-black uppercase tracking-tight">SpearfishIn AI</span>
+                <span className="text-2xl font-black uppercase tracking-tight">SPEARFISH</span>
               </div>
               <p className="text-background/70 text-lg">
                 Build your way into top tech companies. No more resume black holes.
@@ -259,7 +259,7 @@ const Index = () => {
             </div>
           </div>
           <div className="pt-8 border-t-2 border-background/20 text-center text-background/60 text-sm">
-            © 2025 SpearfishIn AI. All rights reserved. Built for builders.
+            © 2025 SPEARFISH. All rights reserved. Built for builders.
           </div>
         </div>
       </footer>

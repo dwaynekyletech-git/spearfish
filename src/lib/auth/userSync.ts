@@ -1,6 +1,7 @@
 import { useUser, useAuth } from '@clerk/clerk-react'
 import { createClient } from '@supabase/supabase-js'
 import { useEffect, useCallback } from 'react'
+import { setSupabaseToken } from '../supabaseClient'
 
 /**
  * Hook to sync user data between Clerk and Supabase
@@ -15,6 +16,9 @@ export function useUserSync() {
 
     // Get Clerk JWT token for Supabase
     const token = await getToken({ template: 'supabase' })
+    
+    // Set the token globally for all Supabase queries
+    setSupabaseToken(token)
     
     // Create authenticated Supabase client with Clerk's JWT
     const supabase = createClient(
@@ -83,6 +87,22 @@ export function useUserSync() {
       syncUserToSupabase()
     }
   }, [isLoaded, user, syncUserToSupabase])
+
+  // Ensure token is set whenever user state changes
+  useEffect(() => {
+    const updateToken = async () => {
+      if (user) {
+        const token = await getToken({ template: 'supabase' })
+        setSupabaseToken(token)
+      } else {
+        setSupabaseToken(null)
+      }
+    }
+    
+    if (isLoaded) {
+      updateToken()
+    }
+  }, [isLoaded, user, getToken])
 
   return { syncUserToSupabase }
 }

@@ -23,7 +23,7 @@ const Auth = () => {
             <div className="w-12 h-12 bg-primary flex items-center justify-center">
               <Target className="w-7 h-7 text-primary-foreground" />
             </div>
-            <span className="text-3xl font-black text-foreground uppercase tracking-tight">SpearfishIn AI</span>
+            <span className="text-3xl font-black text-foreground uppercase tracking-tight">SPEARFISH</span>
           </div>
           <h1 className="text-4xl font-black text-foreground mb-2">
             Welcome

@@ -50,21 +50,56 @@ Instead of remembering commands, use natural language with Warp Agent Mode:
 
 ### Smart Workflow Automation
 
-Ask Warp Agent Mode to handle multi-step workflows:
+Ask Warp Agent Mode to handle multi-step workflows. All workflows MUST include a planning step that uses Warp's built-in TODO checklist (not a markdown file) and MUST check off items as they are completed.
 
 **"Help me start working on the next available task"**
 1. Gets next task with `task-master next`
 2. Shows task details with `task-master show <id>`
-3. Analyzes requirements and suggests implementation approach
-4. Helps implement the solution
-5. Updates task with progress notes
-6. Marks as complete when done
+3. Creates an implementation plan using Warp's built-in TODO checklist
+4. Executes step-by-step, marking each TODO as done immediately upon completion
+5. Updates the Task Master subtask with progress notes (`task-master update-subtask`)
+6. Verifies acceptance criteria/tests
+7. Marks the Task Master task as complete when done (`task-master set-status --id=<id> --status=done`)
 
 **"Analyze my project's task complexity and expand all eligible tasks"**
 1. Runs `task-master analyze-complexity --research`
 2. Reviews the complexity report
 3. Runs `task-master expand --all --research` for high-complexity tasks
 4. Shows updated task structure
+
+### Planning & Execution Protocol (Warp TODOs)
+
+These directives govern how Warp should plan and track progress when working on tasks and subtasks:
+
+- Always plan before implementing, especially for subtasks. If complexity is unclear, create a minimal 3–5 step plan.
+- Use Warp's built-in TODO checklist feature for the plan (no markdown files). Keep items small, actionable, and outcome-oriented.
+- Include success criteria or acceptance checks within the plan where appropriate.
+- Immediately check off a TODO item as soon as its step completes. Reflect the updated checklist to the user after each completion.
+- If a step expands, add new TODO items to the checklist before proceeding. Keep the plan current.
+- Never proceed through multiple steps without updating the checklist state.
+
+#### TODO Lifecycle for a Subtask
+
+1) Inspect context: `task-master show <subtask-id>` to gather requirements and acceptance criteria.
+2) Propose a TODO checklist in Warp (built-in checklist UI) covering 3–7 concrete steps.
+3) Execute the first step; upon completion, immediately check it off and surface the updated checklist state.
+4) Continue step-by-step, always checking off completed items and adjusting the plan if new work is discovered.
+5) If blocked, add a "Blocked: <reason>" TODO item, set Task Master status to `blocked`, and surface what is needed to proceed.
+6) On completion, run validation/verification (tests, lints, type checks if applicable), then mark the Task Master subtask as `done`.
+
+#### Task Master Progress Sync
+
+- At start: `task-master set-status --id=<id> --status=in-progress`.
+- During work: `task-master update-subtask --id=<id> --prompt="progress notes, decisions, diffs"` at meaningful milestones (after 1–2 TODOs).
+- At end: `task-master set-status --id=<id> --status=done` and optionally `task-master next`.
+
+### Common Anti-Patterns to Avoid
+
+- Skipping the planning phase for subtasks.
+- Creating a checklist but not checking off items as they are completed.
+- Completing multiple steps without reflecting progress to the checklist.
+- Losing context between steps (always re-open task details if context is uncertain).
+- Failing to update Task Master with progress notes for significant milestones.
 
 ## Configuration & Setup
 
