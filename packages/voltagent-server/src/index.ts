@@ -3,8 +3,21 @@ import { honoServer } from "@voltagent/server-hono";
 import { researchAgent } from "./agents/research/index.js";
 import { streamResearchCompany } from "./agents/research/index.js";
 import { cors } from "hono/cors";
+import { createClient } from "@supabase/supabase-js";
 
 const port = process.env.VOLTAGENT_PORT ? Number(process.env.VOLTAGENT_PORT) : 3141;
+
+// Initialize Supabase client for fetching company data
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.warn("Warning: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set. Company data enrichment will be unavailable.");
+}
+
+const supabase = supabaseUrl && supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, { auth: { persistSession: false } })
+  : null;
 
 new VoltAgent({
   agents: {
@@ -24,33 +37,84 @@ new VoltAgent({
       // Custom research streaming endpoint
       app.post('/research/stream', async (c) => {
         try {
-          // Accept both shapes: { input: {...} } and direct {...}
+          // Accept both shapes: { input: {...}, userId: "...", options: {...} } and direct {...}
           const raw = (await c.req.json()) as any;
-          const body = raw && typeof raw === 'object' && 'input' in raw ? raw.input : raw as {
+          
+          // Extract userId and options from top level if they exist
+          const userId = raw.userId;
+          const options = raw.options;
+          
+          // Extract the actual body (either from raw.input or raw directly)
+          const body = (raw && typeof raw === 'object' && 'input' in raw ? raw.input : raw) as {
             companyId: string;
             companyName: string;
             githubUrl?: string;
-            userId?: string;
-            options?: {
-              maxSteps?: number;
-              temperature?: number;
-            };
           };
 
           if (!body?.companyId || !body?.companyName) {
             return c.json({ error: 'Missing required fields: companyId, companyName' }, 400);
           }
 
-          // Start streaming
+          // Fetch complete company data from Supabase
+          let companyData: any = null;
+          let githubRepositories: any[] = [];
+          
+          if (supabase) {
+            try {
+              const { data, error } = await supabase
+                .from('companies')
+                .select('id, name, website, one_liner, long_description, batch, stage, team_size, industries, tags, github, huggingface, app_answers')
+                .eq('id', body.companyId)
+                .single();
+              
+              if (!error && data) {
+                companyData = data;
+                console.log('✅ Fetched company data from Supabase:', {
+                  name: data.name,
+                  industries: data.industries,
+                  batch: data.batch,
+                  one_liner: data.one_liner?.substring(0, 50) + '...',
+                  has_github: !!data.github,
+                  has_app_answers_github: !!data.app_answers?.github,
+                });
+                
+                // Extract GitHub repositories
+                const githubData = data.github || data.app_answers?.github;
+                if (githubData && Array.isArray(githubData.repositories)) {
+                  githubRepositories = githubData.repositories;
+                  console.log(`📦 Found ${githubRepositories.length} GitHub repositories`);
+                }
+              } else if (error) {
+                console.error('❌ Error fetching company data:', error);
+              }
+            } catch (err) {
+              console.error('Failed to fetch company data from Supabase:', err);
+            }
+          }
+
+          // Start streaming with enriched company data
+          console.log('🔍 Starting research with:', {
+            companyId: body.companyId,
+            companyName: companyData?.name || body.companyName,
+            userId: userId,
+            hasCompanyData: !!companyData,
+            githubRepoCount: githubRepositories.length,
+          });
+          
           const stream = await streamResearchCompany({
             companyId: body.companyId,
-            companyName: body.companyName,
-            githubUrl: body.githubUrl,
-            options: body.options,
+            companyName: companyData?.name || body.companyName,
+            userId: userId, // Pass Clerk user ID for memory
+            githubUrl: body.githubUrl, // Keep the client-provided URL as fallback
+            githubRepositories, // Pass all repositories
+            companyData, // Pass full company object
+            options: options,
           });
 
           // Create SSE stream
           const encoder = new TextEncoder();
+          const resourceId = `company-research:${body.companyId}`;
+          
           const readable = new ReadableStream({
             async start(controller) {
               try {
@@ -65,7 +129,17 @@ new VoltAgent({
                 // Get final result
                 const finalResult = await stream.object;
                 controller.enqueue(encoder.encode('data: ' + JSON.stringify({ type: 'chunk', data: finalResult }) + '\n\n'));
-                controller.enqueue(encoder.encode('data: ' + JSON.stringify({ type: 'done' }) + '\n\n'));
+                
+                // Send conversation metadata with the done event
+                // The conversation_id will be auto-generated by VoltAgent Memory
+                controller.enqueue(encoder.encode('data: ' + JSON.stringify({ 
+                  type: 'done',
+                  metadata: {
+                    resourceId,
+                    userId: userId,
+                    companyId: body.companyId,
+                  }
+                }) + '\n\n'));
                 controller.close();
               } catch (error) {
                 const errorMsg = error instanceof Error ? error.message : String(error);

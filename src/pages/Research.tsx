@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 
 import { useVoltagentStream } from "@/hooks/useVoltagentStream";
+import { saveCompanyResearch, type CompanyResearchData } from "@/lib/research";
+import { useToast } from "@/hooks/use-toast";
 
 // Types matching CompanyResearchSchema from VoltAgent
 interface BusinessIntelligence {
@@ -97,6 +99,8 @@ export default function Research() {
   const { user: clerkUser } = useUser();
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [researchData, setResearchData] = useState<CompanyResearch | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
   const user = {
     name: clerkUser?.fullName || clerkUser?.firstName || "User",
@@ -121,12 +125,32 @@ export default function Research() {
     staleTime: 60_000,
   });
 
-  // Extract GitHub URL if available
-  const githubUrl = company?.github?.url || company?.app_answers?.github?.url || null;
+  // Extract GitHub URL from repositories array
+  const getGithubUrl = () => {
+    // Try company.github first, then app_answers.github
+    const githubData = company?.github || company?.app_answers?.github;
+    const repos = githubData?.repositories;
+    
+    if (!Array.isArray(repos) || repos.length === 0) {
+      return null;
+    }
+    
+    // Get the most starred repository, or the first one
+    const primaryRepo = repos.reduce((best, current) => {
+      const bestStars = best?.stargazers_count || best?.stars || 0;
+      const currentStars = current?.stargazers_count || current?.stars || 0;
+      return currentStars > bestStars ? current : best;
+    }, repos[0]);
+    
+    // Convert full_name to GitHub URL (e.g., "openai/gpt-3" -> "https://github.com/openai/gpt-3")
+    return primaryRepo?.full_name ? `https://github.com/${primaryRepo.full_name}` : null;
+  };
+  
+  const githubUrl = getGithubUrl();
 
   // AI integration with real user ID
   const userId = clerkUser?.id || "";
-  const { start, loading, error, chunks, done } = useVoltagentStream<{ companyId: string; companyName: string; githubUrl?: string }, Partial<CompanyResearch>>({
+  const { start, loading, error, chunks, metadata, done } = useVoltagentStream<{ companyId: string; companyName: string; githubUrl?: string }, Partial<CompanyResearch>>({
     endpoint: 'research',
     userId,
     buildInput: () => ({
@@ -165,6 +189,36 @@ export default function Research() {
         return "outline";
       default:
         return "secondary";
+    }
+  };
+
+  const handleSaveResearch = async () => {
+    if (!researchData || !id || !userId) return;
+
+    setIsSaving(true);
+    try {
+      const resourceId = metadata?.resourceId || `company-research:${id}`;
+      
+      const result = await saveCompanyResearch(
+        userId,
+        id,
+        researchData as CompanyResearchData,
+        resourceId
+      );
+
+      toast({
+        title: "Research Saved",
+        description: `Successfully saved research${result.conversationId ? ' and linked to conversation' : ''}`,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to save research";
+      toast({
+        title: "Error",
+        description: errorMsg,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -528,9 +582,14 @@ export default function Research() {
           </Link>
           
           <div className="flex gap-3 w-full sm:w-auto">
-            <Button variant="outline" className="flex-1 sm:flex-none">
+            <Button 
+              variant="outline" 
+              className="flex-1 sm:flex-none"
+              onClick={handleSaveResearch}
+              disabled={!researchData || isSaving}
+            >
               <Save className="h-4 w-4 mr-2" />
-              Save Research
+              {isSaving ? 'Saving...' : 'Save Research'}
             </Button>
             
             <Link to={`/projects/${id}`}>

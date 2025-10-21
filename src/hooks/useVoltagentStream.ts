@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { streamVoltagent, VoltagentEndpoint } from '@/lib/voltagentClient';
+import { streamVoltagent, VoltagentEndpoint, StreamMetadata } from '@/lib/voltagentClient';
 
 interface UseVoltagentArgs<I> {
   endpoint: VoltagentEndpoint;
@@ -11,12 +11,14 @@ export function useVoltagentStream<I = unknown, T = unknown>({ endpoint, userId,
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chunks, setChunks] = useState<T[]>([]);
+  const [metadata, setMetadata] = useState<StreamMetadata | undefined>(undefined);
   const doneRef = useRef(false);
 
   const start = useCallback(async () => {
     setLoading(true);
     setError(null);
     setChunks([]);
+    setMetadata(undefined);
     doneRef.current = false;
 
     const input = buildInput();
@@ -25,9 +27,13 @@ export function useVoltagentStream<I = unknown, T = unknown>({ endpoint, userId,
       onProgress: () => {},
       onChunk: (data) => setChunks((prev) => [...prev, data]),
       onError: (msg) => setError(msg),
-      onDone: () => { setLoading(false); doneRef.current = true; },
+      onDone: (meta) => { 
+        setLoading(false); 
+        setMetadata(meta);
+        doneRef.current = true; 
+      },
     });
   }, [endpoint, userId, buildInput]);
 
-  return { start, loading, error, chunks, done: doneRef.current };
+  return { start, loading, error, chunks, metadata, done: doneRef.current };
 }

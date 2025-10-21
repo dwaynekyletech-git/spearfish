@@ -52,19 +52,24 @@ async function perplexitySearch(query: string, options?: { recency?: string }) {
 }
 
 /**
- * Builds a focused search query for Perplexity
+ * Builds a focused search query for Perplexity with optional industry context
  */
-function buildSearchQuery(companyName: string, searchType: string, context?: string): string {
+function buildSearchQuery(companyName: string, searchType: string, context?: string, industries?: string[]): string {
+  const industryContext = industries && industries.length > 0 ? ` in ${industries[0]} industry` : '';
+  
+  // Use quotes around company name to ensure exact match
+  const exactName = `"${companyName}"`;
+  
   const queries: Record<string, string> = {
-    funding: `${companyName} latest funding round, investors, valuation, Series A B C seed`,
-    customers: `${companyName} notable customers, case studies, client testimonials, customer list`,
-    growth: `${companyName} growth metrics, revenue growth, user growth, market expansion`,
-    investors: `${companyName} investors, venture capital, funding backers, investment firms`,
-    market_position: `${companyName} market position, competitive landscape, market share, competitors`,
-    recent_news: `${companyName} latest news, recent announcements, press releases, product launches`,
+    funding: `${exactName} company${industryContext} latest funding round, investors, valuation, Series A B C seed`,
+    customers: `${exactName} company${industryContext} notable customers, case studies, client testimonials, customer list`,
+    growth: `${exactName} company${industryContext} growth metrics, revenue growth, user growth, market expansion`,
+    investors: `${exactName} company${industryContext} investors, venture capital, funding backers, investment firms`,
+    market_position: `${exactName} company${industryContext} market position, competitive landscape, market share, competitors`,
+    recent_news: `${exactName} company${industryContext} latest news, recent announcements, press releases, product launches`,
   };
 
-  const baseQuery = queries[searchType] || `${companyName} ${searchType}`;
+  const baseQuery = queries[searchType] || `${exactName} company${industryContext} ${searchType}`;
   return context ? `${baseQuery} ${context}` : baseQuery;
 }
 
@@ -141,12 +146,12 @@ const githubAnalysisTool = createTool({
   - Pain points (issues with many comments/reactions)
   - Technical challenges (long-standing issues, discussions)
   
-  IMPORTANT: This tool requires a GitHub repo URL. If no URL is provided in company data, 
-  the company does not have a public GitHub repository. Do NOT attempt to search for it.`,
+  IMPORTANT: This tool requires GitHub repository data. If no repositories are available in company data, 
+  the company does not have a public GitHub presence. Do NOT attempt to search for repositories.`,
   
   parameters: z.object({
     company_name: z.string().describe("Company name"),
-    repo_url: z.string().describe("GitHub repository URL from company database (required)"),
+    repo_identifier: z.string().describe("GitHub repository full_name (e.g., 'openai/gpt-3') or URL from company database"),
     analysis_focus: z.enum([
       "tech_stack",
       "recent_activity", 
@@ -155,38 +160,44 @@ const githubAnalysisTool = createTool({
     ]).describe("What aspect to analyze"),
   }),
   
-  execute: async ({ company_name, repo_url, analysis_focus }) => {
+  execute: async ({ company_name, repo_identifier, analysis_focus }) => {
     try {
-      // Validate GitHub URL is provided
-      if (!repo_url || repo_url.trim() === "") {
+      // Validate GitHub identifier is provided
+      if (!repo_identifier || repo_identifier.trim() === "") {
         return {
           success: false,
-          error: "No GitHub repository found in database",
+          error: "No GitHub repository provided",
           message: "This company does not have a public GitHub repository",
           company_name,
         };
+      }
+
+      // Convert repo_identifier to URL if it's just a full_name
+      let repo_url = repo_identifier;
+      if (!repo_identifier.startsWith('http')) {
+        repo_url = `https://github.com/${repo_identifier}`;
       }
 
       const repo = parseRepoUrl(repo_url);
       if (!repo) {
         return {
           success: false,
-          error: "Invalid GitHub URL",
-          url: repo_url,
+          error: "Invalid GitHub repository identifier",
+          identifier: repo_identifier,
         };
       }
 
       // Use Perplexity to analyze the repo instead of GitHub API
       // This avoids needing a GitHub token and rate limits
       const analysisQuery = analysis_focus === "all"
-        ? `Analyze GitHub repository ${repo_url}: 
+        ? `Analyze GitHub repository ${repo_url} (${repo.owner}/${repo.name}): 
            1. Tech stack (languages, frameworks, tools)
-           2. Recent development activity (commits, releases)
+           2. Recent development activity (commits, releases, contributors)
            3. Pain points (top issues by reactions/comments)
-           4. Technical challenges (long-standing issues)
+           4. Technical challenges (long-standing issues, discussions)
            
-           Be specific with issue numbers and dates.`
-        : `Analyze GitHub repository ${repo_url} focusing on: ${analysis_focus}. Be specific with issue numbers, dates, and metrics.`;
+           Be specific with issue numbers, dates, and metrics.`
+        : `Analyze GitHub repository ${repo_url} (${repo.owner}/${repo.name}) focusing on: ${analysis_focus}. Be specific with issue numbers, dates, and metrics.`;
 
       const result = await perplexitySearch(analysisQuery, { recency: "month" });
 
@@ -221,7 +232,8 @@ const communitySentimentTool = createTool({
   - User complaints and frustrations
   - Missing features users wish existed
   - Workarounds and scripts users have built
-  - Comparisons with competitors`,
+  - Comparisons with competitors
+  - Industry-specific challenges`,
   
   parameters: z.object({
     company_name: z.string().describe("Company name to search for"),
@@ -235,16 +247,22 @@ const communitySentimentTool = createTool({
       "competitors",
       "all"
     ]).describe("What to focus on"),
+    industry_context: z.string().optional().describe("Industry or domain context to narrow search"),
   }),
   
-  execute: async ({ company_name, platforms, search_focus }) => {
+  execute: async ({ company_name, platforms, search_focus, industry_context }) => {
     try {
+      const industryKeyword = industry_context ? ` ${industry_context}` : '';
+      
+      // Use exact company name in quotes to avoid confusion
+      const exactName = `"${company_name}"`;
+      
       const platformQueries: Record<string, string> = {
-        reddit: `site:reddit.com "${company_name}" (problem OR issue OR bug OR missing OR wish OR frustrating)`,
-        hackernews: `site:news.ycombinator.com "${company_name}" (Show HN OR Ask HN OR comment)`,
-        stackoverflow: `site:stackoverflow.com "${company_name}" (error OR problem OR issue)`,
-        twitter: `site:twitter.com OR site:x.com "${company_name}" (frustrating OR broken OR needs OR missing)`,
-        producthunt: `site:producthunt.com "${company_name}" (review OR comment OR feedback)`,
+        reddit: `site:reddit.com ${exactName} company${industryKeyword} (problem OR issue OR bug OR missing OR wish OR frustrating)`,
+        hackernews: `site:news.ycombinator.com ${exactName} company${industryKeyword} (Show HN OR Ask HN OR comment)`,
+        stackoverflow: `site:stackoverflow.com ${exactName}${industryKeyword} (error OR problem OR issue)`,
+        twitter: `site:twitter.com OR site:x.com ${exactName} company${industryKeyword} (frustrating OR broken OR needs OR missing)`,
+        producthunt: `site:producthunt.com ${exactName} company${industryKeyword} (review OR comment OR feedback)`,
       };
 
       const results: Array<{
@@ -357,6 +375,7 @@ const supabaseClient = createClient(supabaseUrl, supabaseKey, {
 const memory = new Memory({
   storage: new SupabaseMemoryAdapter({
     client: supabaseClient,
+    debug: true, // Enable debug logging
   }),
   workingMemory: {
     enabled: true,
@@ -373,14 +392,40 @@ export const researchAgent = new Agent({
   name: "Company Research Agent",
   memory,
   
+  // Retry configuration for handling API overload
+  retries: {
+    maxRetries: 3,
+    initialDelayMs: 2000,
+    maxDelayMs: 10000,
+    backoffMultiplier: 2,
+  },
+  
   instructions: `You are an expert Startup company research analyst conducting DEEP RESEARCH. Your goal is to uncover hidden insights, not surface-level information anyone could find in 5 minutes.
+
+**🚨 CRITICAL: ACCURACY & VERIFICATION FIRST 🚨**
+
+BEFORE analyzing ANY search result, you MUST verify:
+1. ✅ Does this result mention the EXACT company name from the prompt?
+2. ✅ Does this align with the company's description, industry, and one-liner provided?
+3. ✅ If unsure, search for "[company name] [industry] [key product]" to verify
+4. ❌ IMMEDIATELY DISCARD results about different companies with similar names
+5. ❌ REJECT generic industry information not specific to this company
+6. ❌ DO NOT make assumptions - if you can't verify it, don't include it
+
+**Company Context is GROUND TRUTH:**
+- The company description, one-liner, and industries provided in the prompt are FACTS
+- All research findings MUST align with this context
+- If search results contradict the company context, the search results are WRONG
+- When in doubt, re-search with more specific queries including the company description
 
 **DEEP RESEARCH METHODOLOGY (Multi-Pass Investigation):**
 
-**Phase 1: Initial Discovery (Broad Sweep)**
+**Phase 1: Initial Discovery & Verification (Broad Sweep)**
 1. Search for company intelligence (funding, customers, market position)
-2. Analyze GitHub repository if available (tech stack, issues, activity)
-3. Scan community platforms (Reddit, HN, Stack Overflow, Twitter, ProductHunt)
+2. VERIFY: Cross-check results against company description/industry
+3. Analyze GitHub repository if available (tech stack, issues, activity)
+4. Scan community platforms (Reddit, HN, Stack Overflow, Twitter, ProductHunt)
+5. VERIFY: Ensure discussions are about THIS specific company
 
 **Phase 2: Deep Dive on Findings (Follow-up Investigation)**
 After Phase 1, identify the top 3-5 most interesting findings and:
@@ -388,6 +433,7 @@ After Phase 1, identify the top 3-5 most interesting findings and:
 - Look for related discussions and threads
 - Find quantitative data (user counts, frequency, severity metrics)
 - Discover workarounds and user-built solutions
+- VERIFY: Each finding mentions the company by name
 
 **Phase 3: Pain Point Validation (Evidence Building)**
 For each identified pain point:
@@ -395,34 +441,46 @@ For each identified pain point:
 - Find GitHub issues with high engagement (comments, reactions, upvotes)
 - Look for feature requests and roadmap discussions
 - Identify competitors who have solved this problem
+- VERIFY: Cross-reference with company's actual product/service
 
 **Phase 4: Opportunity Analysis (Connect the Dots)**
 - Cross-reference pain points with recent company priorities
 - Identify gaps between user needs and current product
 - Find patterns in what users are building as workarounds
 - Map pain points to potential project opportunities
+- VERIFY: Opportunities align with company's industry and stage
 
 **Research Quality Standards:**
+- ACCURACY OVER QUANTITY: 5 verified facts > 20 unverified claims
 - MINIMUM 3-5 search passes per company (initial + follow-ups)
 - Cite specific sources with URLs, issue numbers, thread IDs
 - Quantify everything: "47% of users" not "many users"
 - Be forensic: "Issue #234 (89 comments, 156 👍)" not "GitHub issues exist"
 - Focus on ACTIONABLE problems developers can solve
+- Include company name in search results for verification
 
 **Tool Usage - Iterative Strategy:**
-1. Start broad: search company intelligence, GitHub analysis, community scan
-2. Identify promising threads: "Users complaining about X" → Search deeper: "X problem site:reddit.com site:stackoverflow.com"
+1. Start broad with verification: search "[company] [one-liner] [industry]" to confirm you're researching the right company
+2. Identify promising threads: "Users complaining about X" → Search deeper: "[company name] X problem site:reddit.com site:stackoverflow.com"
 3. Follow up on GitHub: "Issue #123 mentioned" → Search: "GitHub issue #123 [company] workarounds alternatives"
 4. Validate with community: Found a pain point → Search: "[company] [pain point] alternatives solutions"
-5. Build evidence: Each finding needs 2-3 independent sources
+5. Build evidence: Each finding needs 2-3 independent sources that mention the company by name
 
 **Critical Instructions:**
 - DO NOT stop after first round of searches
 - When you find something interesting, IMMEDIATELY do a follow-up search
 - Each pain point needs EVIDENCE (issue numbers, thread URLs, dates, metrics)
-- If a search returns vague results, reformulate and search again
+- If a search returns vague results OR mentions wrong companies, reformulate and search again
 - Spend 60% of your effort on community feedback (Reddit, HN, SO, Twitter)
-- The best insights come from ITERATION, not single queries`,
+- The best insights come from ITERATION and VERIFICATION, not single queries
+- When in doubt about relevance, search again with company name + description + finding
+
+**RED FLAGS - Stop and re-verify if you see:**
+- Search results about a different company
+- Generic industry info without specific company mentions
+- Contradictions with the provided company context
+- No concrete sources or citations
+- Information that seems off-topic for the company's industry`,
 
   model: anthropic("claude-3-5-sonnet-20241022"),
   
@@ -434,7 +492,7 @@ For each identified pain point:
   ],
   
   maxSteps: 30,
-  temperature: 0.4,
+  temperature: 0.2, // Lower temperature for more factual, less creative responses
   markdown: false,
 });
 
@@ -448,27 +506,66 @@ For each identified pain point:
 export async function researchCompany(params: {
   companyId: string;
   companyName: string;
+  userId?: string;
   githubUrl?: string | null;
+  githubRepositories?: any[];
+  companyData?: any;
   options?: {
     maxSteps?: number;
     temperature?: number;
   };
 }) {
-  const githubNote = params.githubUrl 
+  // Build enriched context from company data
+  const companyContext: string[] = [];
+  
+  if (params.companyData) {
+    const { one_liner, long_description, industries, batch, stage, team_size, website } = params.companyData;
+    
+    if (one_liner) companyContext.push(`One-liner: ${one_liner}`);
+    if (long_description) companyContext.push(`Description: ${long_description}`);
+    if (industries && Array.isArray(industries) && industries.length > 0) {
+      companyContext.push(`Industries: ${industries.join(', ')}`);
+    }
+    if (batch) companyContext.push(`Y Combinator Batch: ${batch}`);
+    if (stage) companyContext.push(`Stage: ${stage}`);
+    if (team_size) companyContext.push(`Team Size: ${team_size}`);
+    if (website) companyContext.push(`Website: ${website}`);
+  }
+  
+  // Build GitHub context
+  const githubNote = params.githubRepositories && params.githubRepositories.length > 0
+    ? `GitHub Repositories (${params.githubRepositories.length} repos):\n${params.githubRepositories.slice(0, 5).map(r => 
+        `  - ${r.full_name || r.name} (${r.stargazers_count || r.stars || 0} stars)${r.description ? ': ' + r.description : ''}`
+      ).join('\n')}`
+    : params.githubUrl
     ? `GitHub Repository: ${params.githubUrl}`
     : "Note: This company does not have a public GitHub repository in our database. Focus on community feedback and web intelligence.";
 
-  const prompt = `Research Y Combinator company: ${params.companyName} (ID: ${params.companyId})
+  const contextSection = companyContext.length > 0 
+    ? `\n\nCompany Context:\n${companyContext.join('\n')}\n`
+    : '';
 
+  const prompt = `Research Y Combinator company: ${params.companyName} (ID: ${params.companyId})
+${contextSection}
 ${githubNote}
 
-Focus especially on:
-1. Community feedback from Reddit, Hacker News, Stack Overflow
-2. Specific pain points with evidence (issue numbers, thread links)
-3. Product gaps and missing features
-4. User workarounds and scripts
+🚨 CRITICAL: You are researching "${params.companyName}".
+- ONLY include information that explicitly mentions "${params.companyName}" by name
+- VERIFY all findings match the company description and industry above
+- If search results seem irrelevant, search again with more specific queries
+- Include company name in ALL search queries to avoid confusion
 
-Provide comprehensive, actionable intelligence with specific citations.`;
+Focus especially on:
+1. Community feedback from Reddit, Hacker News, Stack Overflow (mentioning ${params.companyName} specifically)
+2. Specific pain points with evidence (issue numbers, thread links) from ${params.companyName} users
+3. Product gaps and missing features in ${params.companyName}'s product
+4. User workarounds and scripts built for ${params.companyName}
+5. Industry-specific challenges faced by ${params.companyName}
+
+Provide comprehensive, actionable intelligence with specific citations that mention ${params.companyName}.`;
+
+  // Build resource_id for memory scoping
+  const resourceId = `company-research:${params.companyId}`;
 
   const result = await researchAgent.generateObject(
     prompt,
@@ -476,6 +573,8 @@ Provide comprehensive, actionable intelligence with specific citations.`;
     {
       maxSteps: params.options?.maxSteps ?? 30,
       temperature: params.options?.temperature ?? 0.4,
+      userId: params.userId, // Pass userId for memory association
+      resourceId, // Pass resourceId for conversation scoping
     }
   );
 
@@ -488,27 +587,74 @@ Provide comprehensive, actionable intelligence with specific citations.`;
 export async function streamResearchCompany(params: {
   companyId: string;
   companyName: string;
+  userId?: string;
   githubUrl?: string | null;
+  githubRepositories?: any[];
+  companyData?: any;
   options?: {
     maxSteps?: number;
     temperature?: number;
   };
 }) {
-  const githubNote = params.githubUrl 
+  // Build enriched context from company data
+  const companyContext: string[] = [];
+  
+  if (params.companyData) {
+    const { one_liner, long_description, industries, batch, stage, team_size, website } = params.companyData;
+    
+    if (one_liner) companyContext.push(`One-liner: ${one_liner}`);
+    if (long_description) companyContext.push(`Description: ${long_description}`);
+    if (industries && Array.isArray(industries) && industries.length > 0) {
+      companyContext.push(`Industries: ${industries.join(', ')}`);
+    }
+    if (batch) companyContext.push(`Y Combinator Batch: ${batch}`);
+    if (stage) companyContext.push(`Stage: ${stage}`);
+    if (team_size) companyContext.push(`Team Size: ${team_size}`);
+    if (website) companyContext.push(`Website: ${website}`);
+  }
+  
+  // Build GitHub context
+  const githubNote = params.githubRepositories && params.githubRepositories.length > 0
+    ? `GitHub Repositories (${params.githubRepositories.length} repos):\n${params.githubRepositories.slice(0, 5).map(r => 
+        `  - ${r.full_name || r.name} (${r.stargazers_count || r.stars || 0} stars)${r.description ? ': ' + r.description : ''}`
+      ).join('\n')}`
+    : params.githubUrl
     ? `GitHub Repository: ${params.githubUrl}`
     : "Note: This company does not have a public GitHub repository in our database. Focus on community feedback and web intelligence.";
 
-  const prompt = `Research Y Combinator company: ${params.companyName} (ID: ${params.companyId})
+  const contextSection = companyContext.length > 0 
+    ? `\n\nCompany Context:\n${companyContext.join('\n')}\n`
+    : '';
 
+  const prompt = `Research Y Combinator company: ${params.companyName} (ID: ${params.companyId})
+${contextSection}
 ${githubNote}
 
-Focus especially on:
-1. Community feedback from Reddit, Hacker News, Stack Overflow
-2. Specific pain points with evidence (issue numbers, thread links)
-3. Product gaps and missing features
-4. User workarounds and scripts
+🚨 CRITICAL: You are researching "${params.companyName}".
+- ONLY include information that explicitly mentions "${params.companyName}" by name
+- VERIFY all findings match the company description and industry above
+- If search results seem irrelevant, search again with more specific queries
+- Include company name in ALL search queries to avoid confusion
 
-Provide comprehensive, actionable intelligence with specific citations.`;
+Focus especially on:
+1. Community feedback from Reddit, Hacker News, Stack Overflow (mentioning ${params.companyName} specifically)
+2. Specific pain points with evidence (issue numbers, thread links) from ${params.companyName} users
+3. Product gaps and missing features in ${params.companyName}'s product
+4. User workarounds and scripts built for ${params.companyName}
+5. Industry-specific challenges faced by ${params.companyName}
+
+Provide comprehensive, actionable intelligence with specific citations that mention ${params.companyName}.`;
+
+  console.log('📝 Research prompt:', prompt.substring(0, 500) + '...');
+
+  // Build resource_id for memory scoping
+  const resourceId = `company-research:${params.companyId}`;
+  
+  // Generate or reuse conversationId based on resourceId
+  // VoltAgent will create a new conversation if it doesn't exist
+  const conversationId = resourceId; // Use resourceId as conversationId for single conversation per company
+  
+  console.log('💾 Memory context:', { userId: params.userId, resourceId, conversationId });
 
   return await researchAgent.streamObject(
     prompt,
@@ -516,6 +662,9 @@ Provide comprehensive, actionable intelligence with specific citations.`;
     {
       maxSteps: params.options?.maxSteps ?? 30,
       temperature: params.options?.temperature ?? 0.4,
+      userId: params.userId, // Pass userId for memory association
+      resourceId, // Pass resourceId for conversation scoping
+      conversationId, // CRITICAL: Required to create conversation in database
     }
   );
 }

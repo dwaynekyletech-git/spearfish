@@ -1,11 +1,18 @@
 // Client library for calling VoltAgent endpoints with SSE
 export type VoltagentEndpoint = 'research' | 'project-generator' | 'email-outreach';
 
+export interface StreamMetadata {
+  resourceId?: string;
+  userId?: string;
+  companyId?: string;
+  conversationId?: string;
+}
+
 export interface StreamHandlers<T = unknown> {
   onProgress?: (msg: string | undefined) => void;
   onChunk?: (data: T) => void;
   onError?: (message: string) => void;
-  onDone?: () => void;
+  onDone?: (metadata?: StreamMetadata) => void;
 }
 
 export interface VoltagentRequest<I = unknown> {
@@ -64,7 +71,12 @@ export async function streamVoltagent<I = unknown, T = unknown>(req: VoltagentRe
         if (!line.startsWith('data: ')) continue;
         const json = line.slice(6);
         try {
-          const evt = JSON.parse(json) as { type: string; data?: unknown; message?: string };
+          const evt = JSON.parse(json) as { 
+            type: string; 
+            data?: unknown; 
+            message?: string;
+            metadata?: StreamMetadata;
+          };
           switch (evt.type) {
             case 'progress':
               handlers.onProgress?.(evt.message);
@@ -76,7 +88,7 @@ export async function streamVoltagent<I = unknown, T = unknown>(req: VoltagentRe
               handlers.onError?.(evt.message || 'Unknown error');
               break;
             case 'done':
-              handlers.onDone?.();
+              handlers.onDone?.(evt.metadata);
               break;
           }
         } catch (_e) { /* malformed chunk */ }
