@@ -287,14 +287,6 @@ export const projectGeneratorAgent = new Agent({
   name: "Project Ideas Generator",
   memory,
   
-  // Retry configuration
-  retries: {
-    maxRetries: 3,
-    initialDelayMs: 2000,
-    maxDelayMs: 10000,
-    backoffMultiplier: 2,
-  },
-  
   instructions: `You are an expert technical mentor
 
 **YOUR MISSION:**
@@ -466,7 +458,6 @@ Focus on projects that would impress this company's hiring team.`;
       maxSteps: options?.maxSteps ?? 15,
       temperature: options?.temperature ?? 0.4,
       userId: user_profile.user_id,
-      resourceId,
       // Pass structured data as context (VoltAgent will serialize this)
       context: {
         companyResearch: company_research,
@@ -529,7 +520,6 @@ Focus on projects that would impress this company's hiring team.`;
       maxSteps: options?.maxSteps ?? 15,
       temperature: options?.temperature ?? 0.4,
       userId: user_profile.user_id,
-      resourceId,
       conversationId,
     }
   );

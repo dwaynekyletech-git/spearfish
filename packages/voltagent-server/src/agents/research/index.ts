@@ -392,14 +392,6 @@ export const researchAgent = new Agent({
   name: "Company Research Agent",
   memory,
   
-  // Retry configuration for handling API overload
-  retries: {
-    maxRetries: 3,
-    initialDelayMs: 2000,
-    maxDelayMs: 10000,
-    backoffMultiplier: 2,
-  },
-  
   instructions: `You are an expert Startup company research analyst conducting DEEP RESEARCH. Your goal is to uncover hidden insights, not surface-level information anyone could find in 5 minutes.
 
 **🚨 CRITICAL: YOU MUST RETURN A COMPLETE, VALID RESPONSE 🚨**
@@ -598,7 +590,6 @@ Provide comprehensive, actionable intelligence with specific citations that ment
       maxSteps: params.options?.maxSteps ?? 30,
       temperature: params.options?.temperature ?? 0.4,
       userId: params.userId, // Pass userId for memory association
-      resourceId, // Pass resourceId for conversation scoping
     }
   );
 
@@ -687,7 +678,6 @@ Provide comprehensive, actionable intelligence with specific citations that ment
       maxSteps: params.options?.maxSteps ?? 30,
       temperature: params.options?.temperature ?? 0.4,
       userId: params.userId, // Pass userId for memory association
-      resourceId, // Pass resourceId for conversation scoping
       conversationId, // CRITICAL: Required to create conversation in database
     }
   );

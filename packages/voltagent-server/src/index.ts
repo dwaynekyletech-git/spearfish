@@ -2,6 +2,7 @@ import { VoltAgent, VoltAgentObservability } from "@voltagent/core";
 import { honoServer } from "@voltagent/server-hono";
 import { researchAgent, streamResearchCompany } from "./agents/research/index.js";
 import { projectGeneratorAgent, streamProjectIdeas } from "./agents/project-generator/index.js";
+import { emailOutreachAgent, streamEmails } from "./agents/email-outreach/index.js";
 import { cors } from "hono/cors";
 import { createClient } from "@supabase/supabase-js";
 
@@ -23,6 +24,7 @@ new VoltAgent({
   agents: {
     research: researchAgent,
     "project-generator": projectGeneratorAgent,
+    "email-outreach": emailOutreachAgent,
   },
   server: honoServer({
     port,
@@ -42,6 +44,12 @@ new VoltAgent({
       }));
       
       app.use('/project-generator/*', cors({
+        origin: ['http://localhost:8080', 'http://localhost:5173'],
+        allowMethods: ['GET', 'POST', 'OPTIONS'],
+        allowHeaders: ['Content-Type'],
+      }));
+      
+      app.use('/email-outreach/*', cors({
         origin: ['http://localhost:8080', 'http://localhost:5173'],
         allowMethods: ['GET', 'POST', 'OPTIONS'],
         allowHeaders: ['Content-Type'],
@@ -129,7 +137,7 @@ new VoltAgent({
             userId: userId, // Pass Clerk user ID for memory
             githubUrl: body.githubUrl, // Keep the client-provided URL as fallback
             githubRepositories, // Pass all repositories
-            companyData, // Pass full company object
+            companyData: companyData || undefined, // Pass full company object if available
             options: options,
           });
 
@@ -198,7 +206,7 @@ new VoltAgent({
           const body = (raw && typeof raw === 'object' && 'input' in (raw as Record<string, unknown>) ? (raw as Record<string, unknown>).input : raw) as {
             companyId: string;
             companyName: string;
-            companyResearch: Record<string, unknown>;
+            companyResearch: import('./agents/project-generator/schema.js').CompanyResearchInput;
             userProfile: {
               skills: string[];
               careerInterests?: string[];
@@ -312,6 +320,120 @@ new VoltAgent({
           return c.json({ error: errorMsg }, 500);
         }
       });
+
+      // Custom email outreach streaming endpoint
+      app.post('/email-outreach/stream', async (c) => {
+        try {
+          // Accept both shapes: { input: {...}, userId: "...", options: {...} } and direct {...}
+          const raw = await c.req.json();
+          
+          // Extract userId and options from top level if they exist
+          const userId = raw.userId;
+          const options = raw.options;
+          
+          // Extract the actual body (either from raw.input or raw directly)
+          const body = (raw && typeof raw === 'object' && 'input' in (raw as Record<string, unknown>) ? (raw as Record<string, unknown>).input : raw) as {
+            userId: string;
+            companyId: string;
+            projectId: string;
+            tonePreference?: string;
+            additionalContext?: string;
+          };
+
+          if (!body?.userId || !body?.companyId || !body?.projectId) {
+            return c.json({ 
+              error: 'Missing required fields: userId, companyId, projectId' 
+            }, 400);
+          }
+
+          // Start streaming email generation
+          console.log('📧 Starting email generation with:', {
+            userId: body.userId,
+            companyId: body.companyId,
+            projectId: body.projectId,
+            tonePreference: body.tonePreference,
+          });
+          
+          const stream = await streamEmails({
+            user_id: body.userId,
+            company_id: body.companyId,
+            project_id: body.projectId,
+            tone_preference: body.tonePreference as "professional" | "friendly" | "enthusiastic" | undefined,
+            additional_context: body.additionalContext,
+            options: options,
+          });
+
+          // Create SSE stream
+          const encoder = new TextEncoder();
+          const resourceId = `email-outreach:${body.companyId}:${body.projectId}:${body.userId}`;
+          
+          const readable = new ReadableStream({
+            async start(controller) {
+              try {
+                // Send progress updates
+                controller.enqueue(encoder.encode('data: ' + JSON.stringify({ 
+                  type: 'progress', 
+                  message: 'Fetching user profile and company data...' 
+                }) + '\n\n'));
+
+                // Stream partial objects
+                for await (const partial of stream.partialObjectStream) {
+                  controller.enqueue(encoder.encode('data: ' + JSON.stringify({ 
+                    type: 'chunk', 
+                    data: partial 
+                  }) + '\n\n'));
+                }
+
+                // Get final result
+                const finalResult = await stream.object;
+                controller.enqueue(encoder.encode('data: ' + JSON.stringify({ 
+                  type: 'chunk', 
+                  data: finalResult 
+                }) + '\n\n'));
+                
+                // Send conversation metadata with the done event
+                controller.enqueue(encoder.encode('data: ' + JSON.stringify({ 
+                  type: 'done',
+                  metadata: {
+                    resourceId,
+                    userId: body.userId,
+                    companyId: body.companyId,
+                    projectId: body.projectId,
+                  }
+                }) + '\n\n'));
+                controller.close();
+              } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
+                console.error('❌ Email generation error:', errorMsg);
+                
+                // Log the full error for debugging
+                if (error instanceof Error && error.message.includes('schema')) {
+                  console.error('Full error object:', JSON.stringify(error, null, 2));
+                  console.error('Error stack:', error.stack);
+                }
+                
+                controller.enqueue(encoder.encode('data: ' + JSON.stringify({ 
+                  type: 'error', 
+                  message: errorMsg 
+                }) + '\n\n'));
+                controller.close();
+              }
+            },
+          });
+
+          return new Response(readable, {
+            headers: {
+              'Content-Type': 'text/event-stream',
+              'Cache-Control': 'no-cache',
+              'Connection': 'keep-alive',
+            },
+          });
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          console.error('❌ Email outreach endpoint error:', errorMsg);
+          return c.json({ error: errorMsg }, 500);
+        }
+      });
     },
   }),
   observability: new VoltAgentObservability(),
@@ -324,3 +446,6 @@ console.log(`  - /research/stream (Custom SSE endpoint)`);
 console.log(`Project Generator agent available at:`);
 console.log(`  - /agents/project-generator/* (VoltAgent native endpoints)`);
 console.log(`  - /project-generator/stream (Custom SSE endpoint)`);
+console.log(`Email Outreach agent available at:`);
+console.log(`  - /agents/email-outreach/* (VoltAgent native endpoints)`);
+console.log(`  - /email-outreach/stream (Custom SSE endpoint)`);

@@ -48,8 +48,33 @@ export const ProjectIdeasCollectionSchema = z.object({
     .describe("3-5 tailored project ideas, ranked by impact and skill match"),
 });
 
+// Preprocessor to handle when Claude returns stringified JSON
+const ProjectIdeasPreprocessed = z.preprocess(
+  (val) => {
+    // If it's already an object, return as-is
+    if (typeof val === 'object' && val !== null) {
+      return val;
+    }
+    
+    // If it's a string, try to parse it as JSON
+    if (typeof val === 'string') {
+      try {
+        // Remove any trailing commas and parse
+        const cleaned = val.replace(/,\s*([}\]])/g, '$1').replace(/,\s*$/, '');
+        return JSON.parse(cleaned);
+      } catch (e) {
+        // If parsing fails, return original value and let Zod handle the error
+        return val;
+      }
+    }
+    
+    return val;
+  },
+  ProjectIdeasCollectionSchema
+);
+
 export const ProjectIdeasResponseSchema = z.object({
-  project_ideas: ProjectIdeasCollectionSchema.describe("Collection of project ideas with ranking"),
+  project_ideas: ProjectIdeasPreprocessed.describe("Collection of project ideas with ranking"),
   
   recommendation_summary: z.string().describe("Executive summary: top recommendation and why it's the best fit for this user"),
   
