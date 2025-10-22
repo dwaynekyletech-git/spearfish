@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseAuthed } from "@/lib/supabaseClient";
@@ -96,6 +96,7 @@ const loadingMessages = [
 
 export default function Research() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user: clerkUser } = useUser();
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [researchData, setResearchData] = useState<CompanyResearch | null>(null);
@@ -120,7 +121,7 @@ export default function Research() {
         .eq("id", id as string)
         .single();
       if (error) throw error;
-      return data as { id: string; name: string; website?: string; github?: any; app_answers?: any };
+      return data as { id: string; name: string; website?: string; github?: { repositories?: Array<Record<string, unknown>> } | null; app_answers?: { github?: { repositories?: Array<Record<string, unknown>> } } | null };
     },
     staleTime: 60_000,
   });
@@ -592,12 +593,36 @@ export default function Research() {
               {isSaving ? 'Saving...' : 'Save Research'}
             </Button>
             
-            <Link to={`/projects/${id}`}>
-              <Button className="flex-1 sm:flex-none">
-                <Lightbulb className="h-4 w-4 mr-2" />
-                Generate Project Ideas
-              </Button>
-            </Link>
+            <Button 
+              className="flex-1 sm:flex-none"
+              onClick={() => {
+                if (!researchData) {
+                  toast({
+                    title: "No Research",
+                    description: "Please generate research first",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                // Navigate with research data in state
+                navigate(`/projects/${id}`, { 
+                  state: { 
+                    researchData: {
+                      business_intel: researchData.business_intelligence,
+                      technical_landscape: researchData.technical_landscape,
+                      key_people: researchData.key_people,
+                      community_feedback: researchData.community_feedback,
+                      opportunity_signals: researchData.opportunity_signals,
+                      pain_points_summary: researchData.pain_points_summary, // Match server expectation
+                    }
+                  } 
+                });
+              }}
+              disabled={!researchData}
+            >
+              <Lightbulb className="h-4 w-4 mr-2" />
+              Generate Project Ideas
+            </Button>
           </div>
         </div>
       </div>

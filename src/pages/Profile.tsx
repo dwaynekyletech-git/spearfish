@@ -1,5 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,24 +47,15 @@ import {
   X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserProfile, useUpdateUserProfile } from "@/hooks/useUserProfile";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user: clerkUser } = useUser();
   const [activeTab, setActiveTab] = useState("profile");
 
-  // Mock user data - would come from backend
-  const [user, setUser] = useState({
-    name: "Alex Chen",
-    email: "alex@example.com",
-    avatar: "",
-    jobTitle: "Full Stack Developer",
-    skills: ["React", "TypeScript", "Python", "Node.js", "TensorFlow"],
-    interests: ["AI/ML", "Healthcare Tech", "Developer Tools"],
-    targetRoles: ["Senior Engineer", "ML Engineer", "Tech Lead"],
-    resume: "resume-2024.pdf",
-  });
-
+  // All useState hooks must be called before any early returns
   const [settings, setSettings] = useState({
     emailNotifications: true,
     publicPortfolio: true,
@@ -72,6 +64,61 @@ const Profile = () => {
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const [newRole, setNewRole] = useState("");
+
+  // Fetch real user profile data
+  const { data: userProfile, isLoading, error } = useUserProfile();
+  const updateProfile = useUpdateUserProfile();
+
+  // Local state for form data
+  const [profileData, setProfileData] = useState({
+    full_name: userProfile?.full_name || clerkUser?.fullName || '',
+    job_title: userProfile?.job_title || '',
+    skills: userProfile?.skills || [],
+    career_interests: userProfile?.career_interests || [],
+    target_roles: userProfile?.target_roles || [],
+    resume_url: userProfile?.resume_url || null,
+  });
+
+  // Update local state when userProfile changes
+  React.useEffect(() => {
+    if (userProfile) {
+      setProfileData({
+        full_name: userProfile.full_name || clerkUser?.fullName || '',
+        job_title: userProfile.job_title || '',
+        skills: userProfile.skills || [],
+        career_interests: userProfile.career_interests || [],
+        target_roles: userProfile.target_roles || [],
+        resume_url: userProfile.resume_url || null,
+      });
+    }
+  }, [userProfile, clerkUser]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-destructive">Failed to load profile</p>
+          <p className="text-muted-foreground">{error.message}</p>
+          <Button onClick={() => navigate('/onboarding')}>
+            Complete Onboarding
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Mock data for other tabs
   const projectStats = {
@@ -118,44 +165,71 @@ const Profile = () => {
     });
   };
 
-  const handleSaveProfile = () => {
-    toast({
-      title: "Profile saved!",
-      description: "Your changes have been updated.",
-    });
+  const handleSaveProfile = async () => {
+    try {
+      await updateProfile.mutateAsync(profileData);
+      toast({
+        title: "Profile saved!",
+        description: "Your changes have been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving profile",
+        description: "Failed to update your profile. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const addSkill = () => {
     if (newSkill.trim()) {
-      setUser((prev) => ({ ...prev, skills: [...prev.skills, newSkill.trim()] }));
+      setProfileData((prev) => ({ 
+        ...prev, 
+        skills: [...prev.skills, newSkill.trim()] 
+      }));
       setNewSkill("");
     }
   };
 
   const removeSkill = (skill: string) => {
-    setUser((prev) => ({ ...prev, skills: prev.skills.filter((s) => s !== skill) }));
+    setProfileData((prev) => ({ 
+      ...prev, 
+      skills: prev.skills.filter((s) => s !== skill) 
+    }));
   };
 
   const addInterest = () => {
     if (newInterest.trim()) {
-      setUser((prev) => ({ ...prev, interests: [...prev.interests, newInterest.trim()] }));
+      setProfileData((prev) => ({ 
+        ...prev, 
+        career_interests: [...prev.career_interests, newInterest.trim()] 
+      }));
       setNewInterest("");
     }
   };
 
   const removeInterest = (interest: string) => {
-    setUser((prev) => ({ ...prev, interests: prev.interests.filter((i) => i !== interest) }));
+    setProfileData((prev) => ({ 
+      ...prev, 
+      career_interests: prev.career_interests.filter((i) => i !== interest) 
+    }));
   };
 
   const addRole = () => {
     if (newRole.trim()) {
-      setUser((prev) => ({ ...prev, targetRoles: [...prev.targetRoles, newRole.trim()] }));
+      setProfileData((prev) => ({ 
+        ...prev, 
+        target_roles: [...prev.target_roles, newRole.trim()] 
+      }));
       setNewRole("");
     }
   };
 
   const removeRole = (role: string) => {
-    setUser((prev) => ({ ...prev, targetRoles: prev.targetRoles.filter((r) => r !== role) }));
+    setProfileData((prev) => ({ 
+      ...prev, 
+      target_roles: prev.target_roles.filter((r) => r !== role) 
+    }));
   };
 
   const handleDeleteAccount = () => {
@@ -207,9 +281,9 @@ const Profile = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-12 w-12 rounded-full">
                 <Avatar className="h-12 w-12 border-2 border-primary">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={clerkUser?.imageUrl} alt={profileData.full_name || clerkUser?.fullName} />
                   <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-                    {user.name
+                    {(profileData.full_name || clerkUser?.fullName || '')
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -220,8 +294,8 @@ const Profile = () => {
             <DropdownMenuContent className="w-56 bg-card" align="end">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  <p className="text-sm font-medium leading-none">{profileData.full_name || clerkUser?.fullName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{clerkUser?.primaryEmailAddress?.emailAddress}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -272,9 +346,9 @@ const Profile = () => {
                   <div className="flex items-center gap-4 flex-1">
                     <Label className="text-foreground min-w-32">Profile Picture</Label>
                     <Avatar className="h-24 w-24 border-4 border-primary">
-                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarImage src={clerkUser?.imageUrl} alt={profileData.full_name || clerkUser?.fullName} />
                       <AvatarFallback className="bg-primary text-primary-foreground font-bold text-2xl">
-                        {user.name
+                        {(profileData.full_name || clerkUser?.fullName || '')
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
@@ -293,16 +367,16 @@ const Profile = () => {
                     <Label htmlFor="name">Full Name</Label>
                     <Input
                       id="name"
-                      value={user.name}
-                      onChange={(e) => setUser({ ...user, name: e.target.value })}
+                      value={profileData.full_name}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, full_name: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="jobTitle">Job Title</Label>
                     <Input
                       id="jobTitle"
-                      value={user.jobTitle}
-                      onChange={(e) => setUser({ ...user, jobTitle: e.target.value })}
+                      value={profileData.job_title}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, job_title: e.target.value }))}
                     />
                   </div>
                 </div>
@@ -311,7 +385,7 @@ const Profile = () => {
                 <div className="space-y-3">
                   <Label>Skills</Label>
                   <div className="flex flex-wrap gap-2">
-                    {user.skills.map((skill) => (
+                    {profileData.skills.map((skill) => (
                       <Badge key={skill} variant="secondary" className="pr-1">
                         {skill}
                         <Button
@@ -340,7 +414,7 @@ const Profile = () => {
                 <div className="space-y-3">
                   <Label>Interests</Label>
                   <div className="flex flex-wrap gap-2">
-                    {user.interests.map((interest) => (
+                    {profileData.career_interests.map((interest) => (
                       <Badge key={interest} variant="secondary" className="pr-1">
                         {interest}
                         <Button
@@ -369,7 +443,7 @@ const Profile = () => {
                 <div className="space-y-3">
                   <Label>Target Roles</Label>
                   <div className="flex flex-wrap gap-2">
-                    {user.targetRoles.map((role) => (
+                    {profileData.target_roles.map((role) => (
                       <Badge key={role} variant="secondary" className="pr-1">
                         {role}
                         <Button
@@ -401,7 +475,9 @@ const Profile = () => {
                     <div className="flex items-center gap-3">
                       <FileText className="w-8 h-8 text-primary" />
                       <div>
-                        <p className="font-semibold text-foreground">{user.resume}</p>
+                        <p className="font-semibold text-foreground">
+                          {profileData.resume_url ? 'Resume uploaded' : 'No resume uploaded'}
+                        </p>
                         <p className="text-sm text-muted-foreground">Current resume</p>
                       </div>
                     </div>
@@ -412,9 +488,14 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <Button onClick={handleSaveProfile} size="lg" className="w-full md:w-auto">
+                <Button 
+                  onClick={handleSaveProfile} 
+                  size="lg" 
+                  className="w-full md:w-auto"
+                  disabled={updateProfile.isPending}
+                >
                   <Save className="w-4 h-4 mr-2" />
-                  Save Changes
+                  {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               </CardContent>
             </Card>

@@ -13,15 +13,15 @@ import { z } from "zod";
 // ============================================================================
 
 export const BusinessIntelligenceSchema = z.object({
-  funding: z.string().describe("Latest funding round with amount and lead investor (e.g., '$15M Series A led by Sequoia Capital')"),
+  funding: z.string().describe("Latest funding round with amount and lead investor (e.g., '$15M Series A led by Sequoia Capital'). If no information available, use 'No public funding information available.'"),
   
-  investors: z.array(z.string()).describe("List of key investors and VC firms"),
+  investors: z.array(z.string()).describe("List of key investors and VC firms. If none found, use empty array."),
   
-  growth_metrics: z.string().describe("Growth trajectory with specific metrics (e.g., '300% YoY revenue growth, 50K+ active users')"),
+  growth_metrics: z.string().describe("Growth trajectory with specific metrics (e.g., '300% YoY revenue growth, 50K+ active users'). If no metrics available, use 'No public growth metrics available.'"),
   
-  customers: z.array(z.string()).describe("Notable customers and case studies"),
+  customers: z.array(z.string()).describe("Notable customers and case studies. If none found, use empty array."),
   
-  market_position: z.string().describe("Market positioning and competitive landscape summary"),
+  market_position: z.string().describe("Market positioning and competitive landscape summary. If no information available, use 'Market position information not publicly available.'"),
 });
 
 export type BusinessIntelligence = z.infer<typeof BusinessIntelligenceSchema>;
@@ -39,13 +39,13 @@ export const TechnicalPainPointSchema = z.object({
 });
 
 export const TechnicalLandscapeSchema = z.object({
-  tech_stack: z.array(z.string()).describe("Technologies, languages, frameworks, and tools used"),
+  tech_stack: z.array(z.string()).describe("Technologies, languages, frameworks, and tools used. If unknown, use empty array."),
   
-  github_activity: z.string().describe("Summary of GitHub activity: commit frequency, contributors, recent releases"),
+  github_activity: z.string().describe("Summary of GitHub activity: commit frequency, contributors, recent releases. If no GitHub presence, use 'No public GitHub activity available.'"),
   
-  pain_points: z.array(TechnicalPainPointSchema).describe("Technical pain points extracted from GitHub issues, discussions, and user reports"),
+  pain_points: z.array(TechnicalPainPointSchema).describe("Technical pain points extracted from GitHub issues, discussions, and user reports. If none found, use empty array."),
   
-  recent_releases: z.array(z.string()).describe("Recent software releases with dates and key features"),
+  recent_releases: z.array(z.string()).describe("Recent software releases with dates and key features. If none found, use empty array."),
 });
 
 export type TechnicalLandscape = z.infer<typeof TechnicalLandscapeSchema>;
@@ -72,13 +72,13 @@ export type KeyPerson = z.infer<typeof KeyPersonSchema>;
 // ============================================================================
 
 export const CommunityFeedbackSchema = z.object({
-  pain_points: z.array(z.string()).describe("User-reported pain points from Reddit, HN, Stack Overflow (cite specific threads)"),
+  pain_points: z.array(z.string()).describe("User-reported pain points from Reddit, HN, Stack Overflow (cite specific threads). If none found, use empty array."),
   
-  product_gaps: z.array(z.string()).describe("Missing features users wish existed (cite discussions)"),
+  product_gaps: z.array(z.string()).describe("Missing features users wish existed (cite discussions). If none found, use empty array."),
   
-  missing_features: z.array(z.string()).describe("Features competitors have but this product lacks"),
+  missing_features: z.array(z.string()).describe("Features competitors have but this product lacks. If none found, use empty array."),
   
-  user_workarounds: z.array(z.string()).describe("Tools, scripts, or hacks users built to solve problems (cite examples)"),
+  user_workarounds: z.array(z.string()).describe("Tools, scripts, or hacks users built to solve problems (cite examples). If none found, use empty array."),
 });
 
 export type CommunityFeedback = z.infer<typeof CommunityFeedbackSchema>;
@@ -122,13 +122,13 @@ export const CompanyResearchSchema = z.object({
   
   technical_landscape: TechnicalLandscapeSchema,
   
-  key_people: z.array(KeyPersonSchema).describe("Leadership team and key technical personnel"),
+  key_people: z.array(KeyPersonSchema).describe("Leadership team and key technical personnel. If none found, use empty array."),
   
   community_feedback: CommunityFeedbackSchema.describe("CRITICAL: User pain points and product gaps from social platforms"),
   
-  opportunity_signals: z.array(OpportunitySignalSchema).describe("Signals indicating hiring, funding, technical challenges, visibility"),
+  opportunity_signals: z.array(OpportunitySignalSchema).describe("Signals indicating hiring, funding, technical challenges, visibility. If none found, use empty array."),
   
-  pain_points_summary: z.array(PainPointSummaryItemSchema).describe("MOST IMPORTANT: Prioritized, actionable pain points with evidence and project opportunities"),
+  pain_points_summary: z.array(PainPointSummaryItemSchema).describe("MOST IMPORTANT: Prioritized, actionable pain points with evidence and project opportunities. If none found, use empty array."),
 });
 
 export type CompanyResearch = z.infer<typeof CompanyResearchSchema>;

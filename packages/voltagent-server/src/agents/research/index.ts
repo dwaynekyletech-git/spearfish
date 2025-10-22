@@ -77,7 +77,7 @@ function buildSearchQuery(companyName: string, searchType: string, context?: str
  * Parse GitHub repo URL into owner and name
  */
 function parseRepoUrl(url: string): { owner: string; name: string } | null {
-  const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
   if (!match) return null;
   return {
     owner: match[1],
@@ -402,6 +402,22 @@ export const researchAgent = new Agent({
   
   instructions: `You are an expert Startup company research analyst conducting DEEP RESEARCH. Your goal is to uncover hidden insights, not surface-level information anyone could find in 5 minutes.
 
+**🚨 CRITICAL: YOU MUST RETURN A COMPLETE, VALID RESPONSE 🚨**
+
+Your response MUST include ALL required fields in the schema:
+- business_intelligence (with funding, investors, growth_metrics, customers, market_position)
+- technical_landscape (with tech_stack, github_activity, pain_points, recent_releases)
+- key_people (array, can be empty if not found)
+- community_feedback (with pain_points, product_gaps, missing_features, user_workarounds - all arrays)
+- opportunity_signals (array, can be empty if not found)
+- pain_points_summary (array, can be empty if not found)
+
+If you cannot find information for a field:
+- For string fields: Use "No public information available" or similar
+- For arrays: Use empty array []
+- NEVER omit required fields
+- NEVER return incomplete objects
+
 **🚨 CRITICAL: ACCURACY & VERIFICATION FIRST 🚨**
 
 BEFORE analyzing ANY search result, you MUST verify:
@@ -503,13 +519,21 @@ For each identified pain point:
 /**
  * Runs the research agent for a specific company
  */
+type GitHubRepo = {
+  full_name?: string;
+  name?: string;
+  stargazers_count?: number;
+  stars?: number;
+  description?: string;
+};
+
 export async function researchCompany(params: {
   companyId: string;
   companyName: string;
   userId?: string;
   githubUrl?: string | null;
-  githubRepositories?: any[];
-  companyData?: any;
+  githubRepositories?: GitHubRepo[];
+  companyData?: Record<string, unknown>;
   options?: {
     maxSteps?: number;
     temperature?: number;
@@ -534,7 +558,7 @@ export async function researchCompany(params: {
   
   // Build GitHub context
   const githubNote = params.githubRepositories && params.githubRepositories.length > 0
-    ? `GitHub Repositories (${params.githubRepositories.length} repos):\n${params.githubRepositories.slice(0, 5).map(r => 
+    ? `GitHub Repositories (${params.githubRepositories.length} repos):\n${params.githubRepositories.slice(0, 5).map((r: GitHubRepo) => 
         `  - ${r.full_name || r.name} (${r.stargazers_count || r.stars || 0} stars)${r.description ? ': ' + r.description : ''}`
       ).join('\n')}`
     : params.githubUrl
@@ -589,8 +613,8 @@ export async function streamResearchCompany(params: {
   companyName: string;
   userId?: string;
   githubUrl?: string | null;
-  githubRepositories?: any[];
-  companyData?: any;
+  githubRepositories?: GitHubRepo[];
+  companyData?: Record<string, unknown>;
   options?: {
     maxSteps?: number;
     temperature?: number;

@@ -26,11 +26,11 @@ export async function streamVoltagent<I = unknown, T = unknown>(req: VoltagentRe
   // Get VoltAgent base URL from environment (defaults to localhost for dev)
   const baseUrl = import.meta.env.VITE_VOLTAGENT_BASE_URL || 'http://localhost:3141';
   
-  // Map endpoints to custom or VoltAgent paths
+  // Map endpoints to custom SSE paths (not native VoltAgent endpoints)
   const agentPathMap: Record<VoltagentEndpoint, string> = {
     research: '/research/stream',
-    'project-generator': '/agents/project-generator/stream-object',
-    'email-outreach': '/agents/email-outreach/stream-object',
+    'project-generator': '/project-generator/stream',
+    'email-outreach': '/email-outreach/stream',
   };
 
   const url = `${baseUrl}${agentPathMap[req.endpoint]}`;
