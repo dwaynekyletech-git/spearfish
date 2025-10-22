@@ -255,7 +255,24 @@ export default function ProjectIdeas() {
   };
 
   const handleSelectProject = (ideaIndex: number) => {
-    navigate(`/add-project?companyId=${id}&projectIdeaIndex=${ideaIndex}`);
+    const selectedIdea = projectIdeas[ideaIndex];
+    navigate('/add-project', {
+      state: {
+        projectIdeaData: {
+          title: selectedIdea.title,
+          description: selectedIdea.description,
+          problemSolved: selectedIdea.problem_solved,
+          technologies: selectedIdea.technologies || [],
+          timeEstimate: selectedIdea.time_estimate,
+          expectedImpact: selectedIdea.expected_impact,
+          implementationApproach: selectedIdea.implementation_approach,
+          skillMatchScore: selectedIdea.skill_match_score,
+          portfolioValue: selectedIdea.portfolio_value
+        },
+        companyId: id,
+        companyName: company?.name
+      }
+    });
   };
 
   // Show loading state during data fetching
@@ -523,7 +540,9 @@ export default function ProjectIdeas() {
                 
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(`/add-project?companyId=${id}`)}
+                  onClick={() => navigate('/add-project', { 
+                    state: { companyId: id, companyName: company?.name } 
+                  })}
                   className="flex-1 md:flex-none"
                 >
                   Skip - I'll add my own
